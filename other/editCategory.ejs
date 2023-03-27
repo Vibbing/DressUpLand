@@ -1,0 +1,54 @@
+<section class="content-main mt-200">
+  <div class="card">
+    <div class="card-body">
+        <div class="row justify-content-center">
+        <div class="col-lg-6 " >
+          <form>
+            <div class="mb-4">
+              <label for="product_name" class="form-label">Name</label>
+              <input type="text" placeholder="Type here" name="category" class="form-control" id="category" />
+              <p id="err" class="text-danger"></p>
+            </div>
+            <div class="d-grid">
+              <button type="button" class="btn btn-primary" onclick="validation()">Create category</button>
+            </div>
+          </form>
+        </div>
+      </div> <!-- .row // -->
+    </div> <!-- card body .// -->
+  </div> <!-- card .// -->
+</section> <!-- content-main end// -->
+
+
+<script>
+    function validation(){
+        const name = document.getElementById('category')
+        const nameValue = name.value.trim()
+
+        const error = name.parentElement.querySelector('p')
+
+        error.innerText = ''
+
+        let flag = 1
+
+        if(name == ''){
+            error.innerText = "Field is required"
+            flag = 2
+        }
+
+        if(flag == 1){
+            submit(nameValue)
+        }
+    }
+
+    function submit(category){
+        $.ajax({
+            url : 'admin.editCategory',
+            method : 'post',
+            data : {
+                name : category
+            },
+            success
+        })
+    }
+</script>

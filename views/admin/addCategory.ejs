@@ -1,0 +1,263 @@
+<section class="content-main">
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-lg-6 ml-200 pl-100">
+          <form>
+            <div class="mb-4">
+              <label for="product_name" class="form-label">Name</label>
+              <input type="text" placeholder="Type here" name="category" class="form-control" id="category" />
+              <p id="err" class="text-danger"></p>
+            </div>
+            <div class="d-grid">
+              <button type="button" class="btn btn-primary" onclick="validation()">Create category</button>
+            </div>
+          </form>
+        </div>
+        <div class="col-lg-12 mt-60">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th class="text-center">
+
+          </div>
+          </th>
+          <th>No.</th>
+          <th>ID</th>
+          <th>Name</th>
+
+          <% categories.forEach(function(item, index) { %>
+          <th class="text-end"></th>
+          </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td class="text-center">
+
+              </td>
+              <td><%= index %></td>
+              <td><%=  item._id%> </td>
+              <td><%=  item.name%></td>
+
+
+              <td class="text-end">
+                <div>
+                  <a href="#" onclick="editCategory('<%= item._id %>')" id="showModal" class="btn btn-sm font-sm rounded btn-brand">
+                    <i class="material-icons md-edit"></i> Edit
+                  </a>
+                  <a id="deleteProduct" onclick="deleteCategory('<%= item._id %>')" class="btn btn-sm font-sm btn-danger rounded">
+                    <i class="material-icons md-delete_forever"></i> Delete
+                  </a>
+                </div>
+        </div> <!-- dropdown //end -->
+        </td>
+        </tr>
+        </tbody>
+        <% }) %>
+        </table>
+      </div>
+    </div> <!-- .col// -->
+  </div> <!-- .row // -->
+  </div> <!-- card body .// -->
+  </div> <!-- card .// -->
+</section> <!-- content-main end// -->
+
+<script>
+  function validation() {
+
+    const name = document.getElementById('category')
+
+    let nameValue = name.value.trim()
+
+    const error = name.parentElement.querySelector('p')
+
+    error.innerText = ""
+
+    let flag = 1
+
+    if (nameValue == "") {
+      error.innerText = "Field is required"
+      flag = 2
+    }
+
+    if (flag == 1) {
+      submitCategory(nameValue)
+    }
+  }
+
+  function submitCategory(category) {
+    $.ajax({
+      url: '/admin/addCategory',
+      method: 'post',
+      data: {
+        name: category
+      },
+      success(response) {
+        if (response.status) {
+          swal({
+            title: "Category Added Successfully",
+            icon: "success",
+            button: "OK",
+          });
+
+        } else {
+          swal({
+            title: "Already Exist",
+            icon: "error",
+            button: "OK",
+          });
+
+        }
+      }
+    })
+
+  }
+</script>
+
+<style>
+  /* Position modal in the center of the screen */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    overflow: auto;
+  }
+
+  /* Add overlay to the background */
+  .modal::before {
+    content: "";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+</style>
+
+
+<!-- <button class="btn btn-primary" id="showModal">Open Modal</button> -->
+
+<div class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Stock Modal</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card">
+          <div class="card-body">
+            <div class="row justify-content-center">
+              <div class="col-lg-6 ">
+                <form id="edit-category-form">
+                  <div class="mb-4">
+                    <label for="product_name" class="form-label">Name</label>
+                    <input id="editCategory" type="text" placeholder="Type here" name="name" class="form-control" />
+                    <input style="display: none;" id="editCategoryId" type="text" placeholder="Type here" name="_id" class="form-control" /> 
+                    <p id="err" class="text-danger"></p>
+                  </div>
+                  <div class="d-grid">
+                    <button type="submit"  class="btn btn-primary" >Update category</button>
+                  </div>
+                </form>
+              </div>
+            </div> <!-- .row // -->
+          </div> <!-- card body .// -->
+        </div> <!-- card .// -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  $(document).ready(function() {
+    // Show modal on button click
+    $('#showModal').click(function() {
+
+
+    });
+
+    // Hide modal on close button or background click
+    $('.close, .modal').click(function() {
+      $('.modal').hide();
+    });
+
+    // Prevent modal from closing on modal content click
+    $('.modal-content').click(function(e) {
+      e.stopPropagation();
+    });
+
+    $('#edit-category-form').submit(function(e){
+        e.preventDefault();
+        const categoryId = $('#editCategoryId').val()
+        $.ajax({
+            url: '/admin/api/edit-category/'+ categoryId,
+            type:'patch',
+            data: $('#edit-category-form').serialize()
+        }).done(res =>{
+            console.log('success');
+            location.reload();
+        }).fail(err =>{
+
+        })
+    })
+  });
+
+//edit category
+
+  function editCategory(categoryId) {
+    $.ajax({
+      url: '/admin/api/edit-category/' + categoryId,
+      type: 'get',
+    }).done(res => {
+      $('#editCategory').val(res.name);
+      $('#editCategoryId').val(res._id);
+      $('.modal').show()
+    }).fail(err =>{
+
+    })
+  }
+
+  //delete category
+  function deleteCategory(catId){
+  swal({
+    title: "Are you sure?",
+    text: "Once deleted, you will not be able to recover this category!",
+    icon: "warning",
+    buttons: true,
+    dangerMode: true,
+  })
+  .then((willDelete) => {
+    if (willDelete) {
+      $.ajax({
+        url : '/admin/api/delete-category/' + catId,
+        type : 'delete',
+        success(response){
+          if(response.status){
+            swal("Category has been deleted!", {
+              icon: "success",
+            });
+          }else{
+            swal("Oops!", "Something went wrong. Category not deleted!", "error");
+          }
+        }
+      })
+    } else {
+      swal("Category is safe!");
+    }
+  });
+}
+
+
+</script>
