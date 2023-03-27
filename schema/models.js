@@ -41,13 +41,16 @@ const productSchema = new mongoose.Schema({
         type : String
     },
     description:{
-        typr : String
+        type : String
     },
     price:{
         type : Number
     },
     quantity:{
         type : Number
+    },
+    category:{
+        type : String
     },
     img:{
         type : Array

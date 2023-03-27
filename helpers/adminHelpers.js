@@ -39,12 +39,32 @@ module.exports = {
         console.log(error.message);
       }
     },
+
+    /* GET EditProduct Page. */
+    getEditProduct:(proId)=>{
+        try {
+            return new Promise((resolve,reject)=>{
+            productModel.Product.findById(proId).then((product)=>{
+                if(product){
+                    resolve(product)
+                }else{
+                    console.log('product not found');
+                }
+            })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+
+    },
+
     /* GET ProductList Page. */
     getProductList:()=>{
         try {
             return new Promise((resolve,reject)=>{
                  productModel.Product.find().then((product)=>{
                     if(product){
+                        console.log(product);
                         resolve(product)
                     }else{
                         console.log('product not found');

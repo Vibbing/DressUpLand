@@ -43,6 +43,12 @@ router.get('/addProduct',adminController.getAddProduct)
 /* Post addProduct Page. */
 router.post('/addProduct',upload.array('image'),adminController.postAddProduct);
 
+/* GET EditProduct Page. */
+router.get('/editProduct/:id',adminController.getEditProduct)
+
+router.post('/editProduct/:id',adminController.getEditProduct)
+
+
 /* GET ProductList Page. */
 router.get('/productList',adminController.getProductList)
 

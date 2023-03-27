@@ -1,6 +1,7 @@
 const express = require('express')
 const categoryModel = require('../schema/models')
 const adminHelpers = require('../helpers/adminHelpers')
+const { Product } = require('../schema/models')
 
 
 module.exports = {
@@ -58,21 +59,31 @@ module.exports = {
     /* Post AddProduct Page. */
     postAddProduct:(req,res)=>{
         let file = req.files
-        console.log(file,'.....');
         const fileName = file.map((file)=>{
             return file.filename
         })
         const product = req.body
-        console.log(product.name,'/////');
         product.img = fileName
         adminHelpers.postAddProduct(product).then(()=>{
             res.redirect('/admin/dashboard')
         })
     },
 
+    /* GET EditProduct Page. */
+    getEditProduct:(req,res)=>{
+        let proId = req.params.id;
+        adminHelpers.getEditProduct(proId).then(async (product)=>{
+            let category = await categoryModel.Category.find()
+            console.log(product,'........');
+            res.render('admin/editProduct',{layout : 'adminLayout',product,category})
+        })
+
+    },
+
     /* GET ProductList Page. */
     getProductList:(req,res)=>{
         adminHelpers.getProductList().then((product)=>{
+            console.log(Product);
             res.render('admin/productList',{layout : 'adminLayout',product})
         })
     },
