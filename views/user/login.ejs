@@ -24,6 +24,10 @@
                       <div class="form-group d-flex justify-content-center">
                         <button type="button" onclick="validate()" class="btn btn-fill-out btn-block hover-up" name="login">Log in</button>
                       </div>
+                      <div class="divider-text-center mt-15 mb-15">
+                        <span> or</span>
+                      </div>
+                      <div class="text-muted text-center"><a href="#" id="get-otpLogin">Login with OTP</a></div>
                     </form>
                   </div>
                 </div>
@@ -55,11 +59,129 @@
       success(response) {
         if (response.status) {
           location.href = '/'
+        } else if(response.blocked){
+          document.getElementById('error').innerText = "You are blocked by admin"
         } else {
           document.getElementById('error').innerText = "Email or Password is incorrect"
 
         }
+      
       }
     })
   }
 </script>
+
+
+
+<!--get otp login modal form-->
+<div class="modal fade" id="otp-login" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">OTP Login</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form >
+          <div class="mb-3">
+            <label for="Mobile Number" class="form-label">Mobile Number</label>
+            <input type="number" class="form-control" name="mobileNumber" id="mobileNumber" required>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary" id="send-otp" >Send OTP</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  
+  $('#get-otpLogin').click(function() {
+    
+    $('#otp-login').modal('show');
+  
+  });
+
+  // Hide modal on close button or background click
+  $('.close, .modal').click(function() {
+    
+    $('.modal').hide();
+  });
+  $(document).ready(function() {
+
+
+    // Prevent modal from closing on modal content click
+    $('.modal-content').click(function(e) {
+      e.stopPropagation();
+    });
+
+
+    $('#otp-login').on('shown.bs.modal', function() {
+      $('#send-otp').click(function() {
+        const mobileNumber = $('#mobileNumber').val().trim();
+        const error = $('#err');
+        error.text('');
+
+        if (mobileNumber === '') {
+          error.text('Field is required');
+        } else {
+          $.ajax({
+            url: '/otp-login',
+            method: 'post',
+            data: {
+              mobileNumber: mobileNumber
+            },
+            success(response) {
+              if (response.status) {
+                swal({
+                  title: "Category Added Successfully",
+                  icon: "success",
+                  button: "OK",
+                }).then(() => {
+                  location.reload();
+                })
+
+                $('#category-modal').modal('hide');
+              } else {
+                swal({
+                  title: "Already Exist",
+                  icon: "error",
+                  button: "OK",
+                });
+              }
+            }
+          });
+        }
+      });
+    });
+  })
+</script>
+
+<style>
+  /* Position modal in the center of the screen */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    overflow: auto;
+  }
+
+  /* Add overlay to the background */
+  .modal::before {
+    content: "";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+</style>

@@ -11,6 +11,7 @@ const mongodbSession = new ConnectMongodbSession(session)
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');
 
+
 const dataBase = require('./database/connection')
 
 const app = express();
@@ -45,9 +46,9 @@ app.use(express.static(path.join(__dirname, 'public/backEnd')));
 
 
 
-
 app.use('/', userRouter);
 app.use('/admin', adminRouter);
+
 
 
 

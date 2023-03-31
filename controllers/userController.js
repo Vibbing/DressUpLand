@@ -3,6 +3,7 @@ const session = require('express-session')
 const { response } = require('../app')
 const userHelper = require('../helpers/userHelper')
 
+
 module.exports = {
 
     /* GET home page. */
@@ -44,14 +45,31 @@ module.exports = {
             }
         })
     },
+
     /* GET LogOut Page. */
     getLogout:(req,res)=>{
         req.session.user = null
         res.redirect('/login')
     },
 
+    /* GET Otp Login Page. */
+    otpLogin:(req,res)=>{
+       let data = req.body
+       console.log(data);
+    },
+
     /* GET Shop Page. */
     getShop:(req,res)=>{
-        res.render('user/shop')
+      userHelper.getShop().then((product)=>{
+        res.render('user/shop',{product})
+      })
+    },
+
+    /* GET Product Detail Page. */
+    getProductDetail:(req,res)=>{
+        let proId = req.params.id
+        userHelper.getProductDetail(proId).then((product)=>{
+        res.render('user/productDetail',{product})
+    })
     }
 }

@@ -1,4 +1,5 @@
 const userModel = require('../schema/models')
+const productModel = require('../schema/models')
 const bcrypt = require('bcrypt')
 
 module.exports = {
@@ -44,7 +45,6 @@ module.exports = {
                     if (user) {
                         if (user.status == true) {
                             bcrypt.compare(data.password, user.password).then((loginTrue) => {
-                                console.log(loginTrue);
                                 if (loginTrue) {
                                     response.user = user
                                     response.status = true
@@ -67,6 +67,35 @@ module.exports = {
             }
         })
     },
+    /* GET Shop Page. */
+    getShop:()=>{
+    try {
+        return new Promise((resolve,reject)=>{
+            productModel.Product.find().then((product)=>{
+                if(product){
+                    resolve(product)
+                }else{
+                    console.log('product not found');
+                }
+            })
+        })
+    } catch (error) {
+        console.log(error.message);
+    }
+},
+
+/* GET Product Detail Page. */
+getProductDetail:(proId)=>{
+    try {
+        return new Promise((resolve,reject)=>{
+            productModel.Product.findById({_id : proId}).then((response)=>{
+               resolve(response)
+            })
+        })
+    } catch (error) {
+        console.log(error.message);
+    }
+}
 
 }
 

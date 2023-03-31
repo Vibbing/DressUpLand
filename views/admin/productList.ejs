@@ -5,7 +5,7 @@
       <h2 class="content-title card-title">Products List</h2>
     </div>
     <div>
-      <a href="#" class="btn btn-primary btn-sm rounded">Create new</a>
+      <a href="/admin/addProduct" class="btn btn-primary btn-sm rounded">Create new</a>
     </div>
   </div>
   <div class="card mb-4">
@@ -56,7 +56,7 @@
 
             </td>
             <td>
-              <%= item.price%>
+              ₹<%= item.price%>
             </td>
 
             <td>
@@ -69,7 +69,7 @@
 
             <td>
               <a href="/admin/editProduct/<%=item._id%>"> <button class="btn btn-info btn-sm">Edit</button></a>
-              <a href="/admin/deleteProduct/<%=item._id%>" onclick="return confirm('are you sure want to delete the product <%= item.name %>')"><button class="btn btn-danger btn-sm">Delete</button></a>
+              <a href="#" onclick="deleteProduct('<%= item._id %>')"><button class="btn btn-danger btn-sm">Delete</button></a>
             </td>
           </tr>
           <% })%>
@@ -77,3 +77,35 @@
   </div> <!-- card end// -->
 
 </section> <!-- content-main end// -->
+
+<script>
+  function deleteProduct(proId){
+    swal({
+        title: "Are you sure?",
+        text: "Once deleted, you will not be able to recover this category!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then((willDelete) => {
+        if (willDelete) {
+          $.ajax({
+            url: '/admin/deleteProduct/' + proId,
+            method: 'delete',
+            success(response) {
+              if(response.status){
+                swal("Category has been deleted!", {
+                  icon: "success",
+                });
+              }else{
+                swal("Oops!", "Something went wrong. Category not deleted!", "error");
+              }
+            }
+          })
+        }else{
+          swal("Category is safe!");
+        }
+      })
+
+  }
+</script>

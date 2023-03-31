@@ -2,70 +2,89 @@ const mongoose = require('mongoose')
 
 //User Schema
 const userSchema = new mongoose.Schema({
-    name:{
-        type : String
+    name: {
+        type: String
     },
-    email:{
-        type : String
+    email: {
+        type: String
     },
-    mobile:{
-        type : Number
+    mobile: {
+        type: Number
     },
-    password:{
-        type : String
+    password: {
+        type: String
     },
-    createdAt:{
-        type : Date,
-        default : new Date()
+    createdAt: {
+        type: Date,
+        default: new Date()
     },
-    status:{
-        type : Boolean,
-        default : true
+    status: {
+        type: Boolean,
+        default: true
     }
 })
 
 const adminSchema = new mongoose.Schema({
-    email:{
-        type : String
+    email: {
+        type: String
     },
-    password:{
-        type : String
+    password: {
+        type: String
     }
 })
 
 const productSchema = new mongoose.Schema({
-    name:{
-        type : String
+    name: {
+        type: String
     },
-    brand:{
-        type : String
+    brand: {
+        type: String
     },
-    description:{
-        type : String
+    description: {
+        type: String
     },
-    price:{
-        type : Number
+    price: {
+        type: Number
     },
-    quantity:{
-        type : Number
+    quantity: {
+        type: Number
     },
-    category:{
-        type : String
+    category: {
+        type: String
     },
-    img:{
-        type : Array
+    img: {
+        type: Array
     }
 })
 
 const categorySchema = new mongoose.Schema({
-    name:{
-        type : String
+    name: {
+        type: String
     }
 })
 
+const cartSchema = new mongoose.Schema({
+
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user"
+    },
+
+    cartItems: [
+        {
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
+            quantity: { type: Number, default: 1 },
+            price: { type: Number },
+        },
+    ],
+
+})
+
 module.exports = {
-    User : mongoose.model('user',userSchema),
-    Admin : mongoose.model('admin',adminSchema),
-    Product : mongoose.model('product',productSchema),
-    Category : mongoose.model('category',categorySchema)
+    User: mongoose.model('user', userSchema),
+    Admin: mongoose.model('admin', adminSchema),
+    Product: mongoose.model('product', productSchema),
+    Category: mongoose.model('category', categorySchema),
+    Cart: mongoose.model('cart', cartSchema)
+
 }
