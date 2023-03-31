@@ -1,3 +1,11 @@
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+
 <section class="content-main">
   <div class="card">
     <div class="card-body">
@@ -20,7 +28,8 @@
           </th>
           <th>No.</th>
           <th>ID</th>
-          <th>Name</th>
+          <th>Category</th>
+          <th>Sub Category</th>
 
           <% categories.forEach(function(item, index) { %>
           <th class="text-end"></th>
@@ -34,7 +43,19 @@
               </td>
               <td><%= index + 1 %></td>
               <td><%=  item._id%> </td>
-              <td><%=  item.name%></td>
+              <td><%=  item.category%></td>
+              <td><button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Dropdown button
+              </button>
+              
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <% item.sub_category.forEach(function(item, index) { %>
+                <a class="dropdown-item" href="#"><%=  item%></a>
+                 <% }) %>
+              </div>
+             
+              
+              </td>
 
 
               <td class="text-end">
@@ -73,9 +94,14 @@
       <div class="modal-body">
         <form>
           <div class="mb-4">
-            <label for="product_name" class="form-label">Name</label>
+            <label for="product_name" class="form-label">Category</label>
             <input type="text" placeholder="Type here" name="category" class="form-control" id="category" />
-            <p id="err" class="text-danger"></p>
+            <p id="category-err" class="text-danger"></p>
+          </div>
+          <div class="mb-4">
+            <label for="product_name" class="form-label">Sub Category</label>
+            <input type="text" placeholder="Type here" name="subCategory" class="form-control" id="subCategory" />
+            <p id="subCategory-err" class="text-danger"></p>
           </div>
         </form>
       </div>
@@ -107,18 +133,24 @@
 
     $('#category-modal').on('shown.bs.modal', function() {
       $('#submit-category').click(function() {
-        const name = $('#category').val().trim();
-        const error = $('#err');
-        error.text('');
+        const category = $('#category').val().trim();
+        const subCategory = $('#subCategory').val().trim();
 
-        if (name === '') {
-          error.text('Field is required');
-        } else {
+        const categoryError = $('#category-err');
+        const subCategoryError = $('#subCategory-err');
+        categoryError.text('');
+        subCategoryError.text('');
+
+        if (category == '') categoryError.text('Field is required');
+        if (subCategory == '') subCategoryError.text('Field is required')
+        if (!category == '' && !subCategory == '') {
           $.ajax({
             url: '/admin/addCategory',
             method: 'post',
             data: {
-              name: name
+              category: category,
+              sub_category : subCategory
+
             },
             success(response) {
               if (response.status) {
