@@ -161,7 +161,6 @@ module.exports = {
     handleEditCategorys: async (req, res) => {
         try {
             const catId = req.params.id;
-            console.log(catId);
             const category = await categoryModel.Category.findById(catId)
             if (category) {
                 res.status(200).json(category);
@@ -178,7 +177,7 @@ module.exports = {
         try {
             console.log(req.body)
 
-            await categoryModel.Category.updateOne({ _id: req.body._id }, { $set: { name: req.body.name } });
+            await categoryModel.Category.updateOne({ _id: req.body._id }, { $set: { category: req.body.category } });
             res.status(202).json(true);
         } catch (error) {
             res.status(404).redirect('/error')

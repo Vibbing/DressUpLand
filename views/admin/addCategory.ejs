@@ -1,6 +1,6 @@
 
 <head>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+ 
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
@@ -45,11 +45,11 @@
               <td><%=  item._id%> </td>
               <td><%=  item.category%></td>
               <td><button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Dropdown button
+                Sub Category List
               </button>
               
               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <% item.sub_category.forEach(function(item, index) { %>
+                <% item.sub_category.forEach(function(item) { %>
                 <a class="dropdown-item" href="#"><%=  item%></a>
                  <% }) %>
               </div>
@@ -196,8 +196,20 @@
               <div class="col-lg-6 ">
                 <form id="edit-category-form">
                   <div class="mb-4">
-                    <label for="product_name" class="form-label">Name</label>
-                    <input id="editCategory" type="text" placeholder="Type here" name="name" class="form-control" />
+                    
+                    <label for="product_name" class="form-label">Category</label>
+                 
+                    <input id="editCategory" disabled="" type="text" placeholder="Type here" name="category" class="form-control" />
+                    
+                    <select>
+                      <option value="">Sub Category</option>
+                     
+                       
+                      <option id="subCat"></option>
+                  
+                      
+                    </select>
+                    
                     <input style="display: none;" id="editCategoryId" type="text" placeholder="Type here" name="_id" class="form-control" />
                     <p id="err" class="text-danger"></p>
                   </div>
@@ -255,7 +267,7 @@
       url: '/admin/api/edit-category/' + categoryId,
       type: 'get',
     }).done(res => {
-      $('#editCategory').val(res.name);
+      $('#editCategory').val(res.category);
       $('#editCategoryId').val(res._id);
       $('.modal').show()
     }).fail(err => {

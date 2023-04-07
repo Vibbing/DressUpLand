@@ -32,8 +32,14 @@ router.get('/shop',auth.userAuth, userController.getShop)
 router.get('/product-detail/:id', auth.userAuth, userController.getProductDetail)
 
 /* GET Cart Page */
-router.get('/cart-list',cartController.getCart)
+router.get('/cart-list',auth.userAuth, cartController.getCart)
 
+/* POST Update cart quantity Page */
+router.post('/changeQuantity',auth.userAuth,cartController.updateQuantity)
+
+/* POST ADD To Cart Page */
+// router.route('/add-to-cart/:id').get(cartController.addToCart)
+router.post('/add-to-cart/:id',cartController.addToCart)
 
 
 module.exports = router;

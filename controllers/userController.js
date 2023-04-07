@@ -2,14 +2,19 @@ const express = require('express')
 const session = require('express-session')
 const { response } = require('../app')
 const userHelper = require('../helpers/userHelper')
+const cartHelpers = require('../helpers/cartHelpers')
 
 
 module.exports = {
 
     /* GET home page. */
-    getHomePage: (req, res) => {
+    getHomePage: async (req, res) => {
+        var count = null
         let user = req.session.user
-        res.render('homePage',{layout: 'Layout',user})
+        if(user){
+        var count = await cartHelpers.getCartCount(user._id)
+        }
+        res.render('homePage',{layout: 'Layout',user,count})
     },
 
     /* GET SignUp Page. */
@@ -59,17 +64,21 @@ module.exports = {
     },
 
     /* GET Shop Page. */
-    getShop:(req,res)=>{
+    getShop:async (req,res)=>{
+        let user = req.session.user
+        let count = await cartHelpers.getCartCount(user._id)
       userHelper.getShop().then((product)=>{
-        res.render('user/shop',{product})
+        res.render('user/shop',{layout : 'Layout',product,user,count})
       })
     },
 
     /* GET Product Detail Page. */
-    getProductDetail:(req,res)=>{
+    getProductDetail:async (req,res)=>{
         let proId = req.params.id
+        let user = req.session.user
+        let count = await cartHelpers.getCartCount(user._id)
         userHelper.getProductDetail(proId).then((product)=>{
-        res.render('user/productDetail',{product})
+        res.render('user/productDetail',{product,user,count})
     })
     }
 }
