@@ -1,5 +1,6 @@
+const DB_URL = process.env.DB_URL
 const mongoose = require('mongoose')
 mongoose.set('strictQuery',false)
-mongoose.connect('mongodb://localhost:27017/E-Commerce')
+mongoose.connect(DB_URL)
 .then(()=>console.log('DataBase Connected Successfully'))
 .catch((err)=>console.log(err.message))

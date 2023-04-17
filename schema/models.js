@@ -83,11 +83,67 @@ const cartSchema = new mongoose.Schema({
 
 })
 
+const addressSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    },
+
+    Address: [
+        {
+            fname: { type: String },
+            lname: { type: String },
+            street: { type: String },
+            appartment: { type: String },
+            city: { type: String },
+            state: { type: String },
+            zipcode: { type: String },
+            phone: { type: String },
+            email: { type: String }
+        }
+    ]
+
+})
+
+const orderSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    },
+
+    orders: [
+        {
+            fname: { type: String },
+            lname: { type: String },
+            phone: { type: Number },
+            paymentMethod: { type: String },
+            paymentStatus: { type: String },
+            totalPrice: { type: Number },
+            totalQuantity: { type: Number },
+            productDetails: { type: Array },
+            shippingAddress: { type: Object },
+            paymentMethod: String,
+            status: {
+                type: Boolean,
+                default: true
+            },
+            paymentType: String,
+            createdAt: {
+                type: Date,
+                default: new Date()
+            },
+            orderConfirm: { type: String, default: "ordered" }
+        }
+    ]
+})
+
 module.exports = {
     User: mongoose.model('user', userSchema),
     Admin: mongoose.model('admin', adminSchema),
     Product: mongoose.model('product', productSchema),
     Category: mongoose.model('category', categorySchema),
-    Cart: mongoose.model('cart', cartSchema)
+    Cart: mongoose.model('cart', cartSchema),
+    Address: mongoose.model('address', addressSchema),
+    Order : mongoose.model('order',orderSchema),
 
 }

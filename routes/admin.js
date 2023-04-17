@@ -26,8 +26,8 @@ router.put('/change_user_status',adminController.changeUserStatus)
 /* GET addCategory Page. */
 router.get('/addCategory',auth.adminAuth, adminController.getAddCategory)
 
-// /* Post addCategory Page. */
-// router.post('/addCategory',adminController.postAddCategory)
+/* Post addCategory Page. */
+router.post('/addCategory',adminController.postAddCategory)
 
 // /* GET editCategory Page. */
 // router.get('/editCategory',auth.adminAuth,adminController.getEditCategory)

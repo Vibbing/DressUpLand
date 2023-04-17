@@ -27,7 +27,8 @@
                       <div class="divider-text-center mt-15 mb-15">
                         <span> or</span>
                       </div>
-                      <div class="text-muted text-center"><a href="#" id="get-otpLogin">Login with OTP</a></div>
+                      <div class="text-muted text-center mb-15"><a href="#" id="get-otpLogin">Login with OTP</a></div>
+                      <p class="text-muted text-center">Don't have an account? <a href="/signup">Sign up</a></p>
                     </form>
                   </div>
                 </div>
@@ -76,12 +77,12 @@
 <!--get otp login modal form-->
 <div class="modal fade" id="otp-login" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
+    <div id="content-modal" class="modal-content">
+      <div id="verify-header" class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">OTP Login</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
+      <div id="otp-login-modal" class="modal-body">
         <form >
           <div class="mb-3">
             <label for="Mobile Number" class="form-label">Mobile Number</label>
@@ -102,6 +103,7 @@
   $('#get-otpLogin').click(function() {
     
     $('#otp-login').modal('show');
+    
   
   });
 
@@ -120,7 +122,8 @@
 
 
     $('#otp-login').on('shown.bs.modal', function() {
-      $('#send-otp').click(function() {
+      $('#send-otp').click(function(e) {
+        e.preventDefault()
         const mobileNumber = $('#mobileNumber').val().trim();
         const error = $('#err');
         error.text('');
@@ -135,16 +138,10 @@
               mobileNumber: mobileNumber
             },
             success(response) {
-              if (response.status) {
-                swal({
-                  title: "Category Added Successfully",
-                  icon: "success",
-                  button: "OK",
-                }).then(() => {
-                  location.reload();
-                })
+              if (!response.error) {
 
-                $('#category-modal').modal('hide');
+                setTimeout(appendVerifyForm(), 5000)
+                
               } else {
                 swal({
                   title: "Already Exist",
@@ -157,7 +154,55 @@
         }
       });
     });
+
+
   })
+
+ 
+  
+  function verifyOtp(){
+    
+    const otp = $('#otp').val();
+    console.log("clicked")
+
+
+    $.ajax({
+        url:'/otp-verify',
+        type: 'post',
+        data: {
+          otp : otp
+        }
+      }).done(res =>{
+        console.log('kom');
+        location.reload()
+      }).fail(err =>{
+
+      })
+
+
+  }
+
+  function appendVerifyForm(){
+
+    $('#otp-login-modal').remove()
+    $('#verify-header').remove()
+
+    $(` <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Verify OTP </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="otp-verify">
+          <div class="mb-3">
+            <label for="Mobile Number" class="form-label">Verify Code</label>
+            <input id="otp" type="number" class="form-control" name="otp" id="otp" required>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="button" onclick="verifyOtp()" class="btn btn-primary" id="send-otp" >Send OTP</button>
+          </div>
+        </form>
+      </div>`).appendTo('#content-modal')
+  }
 </script>
 
 <style>

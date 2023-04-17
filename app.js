@@ -11,7 +11,7 @@ const mongodbSession = new ConnectMongodbSession(session)
 const userRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');
 
-
+const DB_URL = process.env.DB_URL
 const dataBase = require('./database/connection')
 
 const app = express();
@@ -30,7 +30,7 @@ app.use(session({
   secret: 'sessionSecret',
   resave: false,
   store: new mongodbSession({
-    uri: "mongodb://localhost:27017/E-Commerce",
+    uri: (DB_URL) ,
     collection: "session"
   }),
   cookie: {
