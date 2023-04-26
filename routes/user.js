@@ -24,10 +24,10 @@ router.post('/login',userController.postLogin)
 router.get('/logout',userController.getLogout)
 
 /* Post Otp Login Page. */
-router.post('/otp-login',auth.userAuth, userController.otpLogin)
+router.post('/otp-login', userController.otpLogin)
 
 /* Post Otp vefify Page. */
-router.post('/otp-verify', auth.userAuth, userController.otpVerify)
+router.post('/otp-verify', userController.otpVerify)
 
 /* GET Shop Page. */
 router.get('/shop',auth.userAuth, userController.getShop)
@@ -59,9 +59,21 @@ router.get('/check-out',auth.userAuth,orderController.getCheckOut)
 /* POST Check Out Page */
 router.post('/check-out',orderController.postCheckOut)
 
-router.route('/order-product/:id').get(auth.userAuth,orderController.getProduct)
+// router.route('/order-product/:id').get(auth.userAuth,orderController.getProduct)
+
+router.route('/order-details/:id').get(auth.userAuth,orderController.orderDetails)
 
 router.route('/verify_payment').post(auth.userAuth,orderController.verifyPayment)
+
+router.route('/cancel-order/').post(orderController.cancelOrder)
+
+router.route('/return-order/').post(orderController.returnOrder)
+
+router.route('/wish-list').get(auth.userAuth, userController.getWishList)
+
+router.route('/add-to-wishlist').post(userController.addWishList)
+
+router.route('/remove-product-wishlist').delete(userController.removeProductWishlist)
 
 
 module.exports = router;

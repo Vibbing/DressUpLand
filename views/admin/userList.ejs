@@ -50,7 +50,9 @@
                   <td><%= new Date(item.createdAt).toDateString() %></td>
 
                   <td class="text-end">
-                    
+                 
+                    <button class="btn btn-info text-white"><a href="/admin/order-list/<%=item._id%>">Orders</a></button>
+                   
                     <% if (item.status == true) { %>
                     <button class="btn btn-danger text-white" onclick="changeUserStatus('<%= item._id %>',false)">Block</button>
                     <% } else { %>

@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController')
 const auth = require('../middleware/auth')
-const multer = require('../config/multer')
+const multer = require('../config/multer');
+const orderControllers = require('../controllers/orderControllers');
 
 
 /* GET Dashboard */
@@ -37,6 +38,9 @@ router.post('/addCategory',adminController.postAddCategory)
 
 router.route('/api/edit-category/:id').get(auth.adminAuth,adminController.handleEditCategorys).patch(adminController.handleEditCategoryPatch);
 
+/* Delete Sub Category Page. */
+router.route('/remove-subCategory/:id').delete(adminController.removeSubCategory)
+
 /* Delete Category Page. */
 router.delete('/api/delete-category/:id',adminController.deleteCategory)
 
@@ -54,8 +58,21 @@ router.post('/editProduct/:id',multer.editeduploads,adminController.postEditProd
 
 /*  Delete Product Page. */
 router.delete('/deleteProduct/:id',adminController.deleteProduct)
-/* GET ProductList Page. */
+
+/* GET Product List Page. */
 router.get('/productList',auth.adminAuth, adminController.getProductList)
+
+/* GET Order List Page. */
+router.route('/order-list/:id').get(auth.adminAuth, adminController.getOrderList)
+
+/* GET Order Details Page. */
+router.route('/order-details').get(auth.adminAuth, adminController.getOrderDetails)
+
+/* POST Order Status Page. */
+router.route('/change-order-status').post(orderControllers.changeOrderStatus)
+
+/* GET Add Coupon Page. */
+router.route('/add-coupon').get(auth.adminAuth,adminController.getAddCoupon)
 
 
 /* GET error Page. */

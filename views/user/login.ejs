@@ -163,9 +163,6 @@
   function verifyOtp(){
     
     const otp = $('#otp').val();
-    console.log("clicked")
-
-
     $.ajax({
         url:'/otp-verify',
         type: 'post',
@@ -173,8 +170,7 @@
           otp : otp
         }
       }).done(res =>{
-        console.log('kom');
-        location.reload()
+        location.href = '/'
       }).fail(err =>{
 
       })

@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String
     },
+    wallet: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: new Date()
@@ -137,6 +141,26 @@ const orderSchema = new mongoose.Schema({
     ]
 })
 
+const wishListSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    },
+    wishList: [
+        {
+            productId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'product'
+            },
+
+            createdAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ]
+})
+
 module.exports = {
     User: mongoose.model('user', userSchema),
     Admin: mongoose.model('admin', adminSchema),
@@ -144,6 +168,7 @@ module.exports = {
     Category: mongoose.model('category', categorySchema),
     Cart: mongoose.model('cart', cartSchema),
     Address: mongoose.model('address', addressSchema),
-    Order : mongoose.model('order',orderSchema),
+    Order: mongoose.model('order', orderSchema),
+    Wishlist: mongoose.model('wishlist', wishListSchema)
 
 }

@@ -2,6 +2,7 @@ const express = require('express')
 const session = require('express-session')
 const userHelper = require('../helpers/userHelper')
 const cartHelpers = require('../helpers/cartHelpers')
+const wishListHelpers = require('../helpers/wishlistHelpers')
 const userModel = require('../schema/models')
 const { sendOtpApi, otpVerify } = require('../api/twilio')
 
@@ -11,11 +12,13 @@ module.exports = {
     /* GET home page. */
     getHomePage: async (req, res) => {
         var count = null
+        var wishlistCount = null
         let user = req.session.user
         if (user) {
             var count = await cartHelpers.getCartCount(user._id)
+            var wishlistCount = await wishListHelpers.getWishListCount(user._id)
         }
-        res.render('homePage', { layout: 'Layout', user, count })
+        res.render('homePage', { layout: 'Layout', user, count, wishlistCount})
     },
 
     /* GET SignUp Page. */
@@ -102,8 +105,9 @@ module.exports = {
     getShop: async (req, res) => {
         let user = req.session.user
         let count = await cartHelpers.getCartCount(user._id)
+        const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         userHelper.getShop().then((product) => {
-            res.render('user/shop', { layout: 'Layout', product, user, count })
+            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount })
         })
     },
 
@@ -112,8 +116,46 @@ module.exports = {
         let proId = req.params.id
         let user = req.session.user
         let count = await cartHelpers.getCartCount(user._id)
+        const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         userHelper.getProductDetail(proId).then((product) => {
-            res.render('user/productDetail', { product, user, count })
+            res.render('user/productDetail', { product, user, count, wishlistCount })
+        })
+    },
+
+    getDetails:(userId)=>{
+        try {
+            return new Promise((resolve,reject)=>{
+            userModel.User.findOne({_id : userId}).then((user)=>{
+                resolve(user)
+            })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    getWishList: async (req,res)=>{
+        let user = req.session.user
+        let count = await cartHelpers.getCartCount(user._id)
+        const wishlistCount = await wishListHelpers.getWishListCount(user._id)
+        wishListHelpers.getWishListProducts(user._id).then((wishlistProducts)=>{
+            res.render('user/wishList',{user,count,wishlistProducts,wishlistCount})
+        })
+    },
+
+    addWishList:(req,res)=>{
+        let proId = req.body.proId
+        let userId = req.session.user._id
+        wishListHelpers.addWishList(userId,proId).then((response)=>{
+            res.send(response)
+        })
+    },
+
+    removeProductWishlist:(req,res)=>{
+        let proId = req.body.proId
+        let wishListId = req.body.wishListId
+        wishListHelpers.removeProductWishlist(proId,wishListId).then((response)=>{
+            res.send(response)
         })
     }
 }

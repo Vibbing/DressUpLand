@@ -2,6 +2,8 @@ const express = require('express')
 const categoryModel = require('../schema/models')
 const adminHelpers = require('../helpers/adminHelpers')
 const { Product } = require('../schema/models')
+const orderHelpers = require('../helpers/orderHelpers')
+const userController = require('./userController')
 
 
 module.exports = {
@@ -9,12 +11,12 @@ module.exports = {
     /* GET Dashboard */
     getDashboard: (req, res) => {
         let admin = req.session.admin
-        res.render('admin/dashboard', { layout: 'adminLayout',admin})
+        res.render('admin/dashboard', { layout: 'adminLayout', admin })
     },
 
     /* GET Login Page. */
     getLogin: (req, res) => {
-        res.render('admin/login', { layout: 'adminLayout'})
+        res.render('admin/login', { layout: 'adminLayout' })
     },
 
     /* Post Login Page. */
@@ -26,32 +28,34 @@ module.exports = {
         })
     },
 
-    doLogout:(req,res)=>{
+    doLogout: (req, res) => {
         req.session.admin = null
         res.redirect('/admin/login')
     },
 
     /* GET User List Page. */
-    getUserList:(req,res)=>{
-        adminHelpers.getUserList().then((user)=>{
-            res.render('admin/userList',{layout : 'adminLayout',user})
+    getUserList: (req, res) => {
+        let admin = req.session.admin
+        adminHelpers.getUserList().then((user) => {
+            res.render('admin/userList', { layout: 'adminLayout', user, admin })
         })
     },
 
     // Put change user stastus//
-    changeUserStatus:(req,res)=>{
+    changeUserStatus: (req, res) => {
         let userId = req.query.id
         let status = req.query.status
         console.log(req.query);
-        adminHelpers.changeUserStatus(userId,status).then(()=>{
+        adminHelpers.changeUserStatus(userId, status).then(() => {
             res.send(status)
         })
     },
 
     /* GET Category Page. */
     getAddCategory: async (req, res) => {
+        let admin = req.session.admin
         let categories = await categoryModel.Category.find()
-        res.render('admin/addCategory', { layout: 'adminLayout', categories })
+        res.render('admin/addCategory', { layout: 'adminLayout', categories, admin })
     },
 
     /* Post addCategory Page. */
@@ -75,8 +79,9 @@ module.exports = {
 
     /* GET AddProduct Page. */
     getAddProduct: async (req, res) => {
+        let admin = req.session.admin
         let categories = await categoryModel.Category.find()
-        res.render('admin/addProduct', { layout: 'adminLayout', categories })
+        res.render('admin/addProduct', { layout: 'adminLayout', categories, admin })
     },
 
     /* Post AddProduct Page. */
@@ -95,10 +100,11 @@ module.exports = {
 
     /* GET EditProduct Page. */
     getEditProduct: (req, res) => {
+        let admin = req.session.admin
         let proId = req.params.id;
         adminHelpers.getEditProduct(proId).then(async (product) => {
             let category = await categoryModel.Category.find()
-            res.render('admin/editProduct', { layout: 'adminLayout', product, category })
+            res.render('admin/editProduct', { layout: 'adminLayout', product, category, admin })
         })
 
     },
@@ -141,18 +147,19 @@ module.exports = {
     },
 
     /*  Delete Product Page. */
-    deleteProduct:(req,res)=>{
+    deleteProduct: (req, res) => {
         let proId = req.params.id
-        adminHelpers.deleteProduct(proId).then((response)=>{
+        adminHelpers.deleteProduct(proId).then((response) => {
             res.send(response)
         })
     },
 
     /* GET ProductList Page. */
     getProductList: (req, res) => {
+        let admin = req.session.admin
         adminHelpers.getProductList().then((product) => {
             console.log(Product);
-            res.render('admin/productList', { layout: 'adminLayout', product })
+            res.render('admin/productList', { layout: 'adminLayout', product, admin })
         })
     },
 
@@ -177,11 +184,18 @@ module.exports = {
         try {
             console.log(req.body)
 
-            await categoryModel.Category.updateOne({ _id: req.body._id }, { $set: { category: req.body.category } });
+            await categoryModel.Category.updateOne({ _id: req.body._id }, { $push: { sub_category: req.body.newSubCat } });
             res.status(202).json(true);
         } catch (error) {
             res.status(404).redirect('/error')
         }
+    },
+
+    removeSubCategory:(req,res)=>{
+        let cartId = req.params.id
+        adminHelpers.deleteSubCategory(cartId, req.body.newSubCat).then((response)=>{
+            res.send(response)
+        })
     },
     /* Delete Category Page. */
     deleteCategory: (req, res) => {
@@ -191,8 +205,51 @@ module.exports = {
         })
     },
 
+    /* GET Order List Page. */
+    getOrderList: (req, res) => {
+        let userId = req.params.id
+        let admin = req.session.admin
+        // orderHelpers.getAddress(userId).then((address) => {
+        adminHelpers.getUserList().then((user) => {
+            orderHelpers.getOrders(userId).then((order) => {
+                res.render('admin/orderList', { layout: 'adminLayout', user, admin, order })
+            })
+        })
+        // })
+    },
+
+    /* GET Order Details Page. */
+    getOrderDetails: async (req, res) => {
+        let admin = req.session.admin
+        let orderId = req.query.orderId
+        let userId = req.query.userId
+        let userDetails = await userController.getDetails(userId)
+        orderHelpers.getOrderAddress(userId, orderId).then((address) => {
+            orderHelpers.getSubOrders(orderId, userId).then((orderDetails) => {
+                orderHelpers.getOrderedProducts(orderId, userId).then((product) => {
+                    orderHelpers.getTotal(orderId, userId).then((productTotalPrice) => {
+                        orderHelpers.getOrderTotal(orderId, userId).then((orderTotalPrice) => {
+                            // console.log('orderDetails',orderDetails,'orderDetails');
+                            // console.log('orderId',orderId,'orderId');
+                            res.render('admin/orderDetails', {
+                                layout: 'adminLayout', admin, userDetails,
+                                address, product, orderId, orderDetails, productTotalPrice, orderTotalPrice
+                            })
+                        })
+                    })
+                })
+            })
+        })
+    },
+
+    /* GET Add Coupon Page. */
+    getAddCoupon:(req,res)=>{
+        res.render('admin/addCoupon',{layout : 'adminLayout'})
+    }
     // errorPage:(req,res)=>{
     //     res.render('error',{layout : 'adminlayout'})
     // }
 
 }
+
+

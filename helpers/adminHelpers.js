@@ -240,5 +240,17 @@ module.exports = {
         } catch (error) {
             console.log(err.message);
         }
-    }
+    },
+    deleteSubCategory: (id, data) => {
+        return new Promise(async (resolve, reject) => {
+          await categoryModel.Category.updateOne(
+            { _id: id },
+            { $pull: { sub_category: { $in: [data] } } }
+          ).then((response) => {
+            console.log(response);
+            resolve(response);
+          })
+        });
+      }
+      
 }

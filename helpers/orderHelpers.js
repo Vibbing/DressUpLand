@@ -3,7 +3,11 @@ const { ObjectId } = require('mongodb');
 const Razorpay = require('razorpay');
 const cartModel = require('../schema/models')
 const addressModel = require('../schema/models')
-const orderModel = require('../schema/models')
+const orderModel = require('../schema/models');
+const userModel = require('../schema/models')
+const { promises } = require('dns');
+const { resolve } = require('path');
+const { response } = require('../app');
 
 require('dotenv').config();
 
@@ -177,6 +181,7 @@ module.exports = {
     //Post Check Out Page
     placeOrder: (data) => {
         try {
+            let flag = 0
             return new Promise(async (resolve, reject) => {
                 let productDetails = await cartModel.Cart.aggregate([
                     {
@@ -211,6 +216,7 @@ module.exports = {
                             productId: "$productDetails._id",
                             productName: "$productDetails.name",
                             productPrice: "$productDetails.price",
+                            brand: "$productDetails.brand",
                             quantity: "$quantity",
                             category: "$productDetails.category",
                             image: "$productDetails.img"
@@ -232,15 +238,29 @@ module.exports = {
                         $project: { item: "$Address" }
                     }
                 ])
-                console.log();
 
                 let status, orderStatus;
                 if (data.payment_option === "COD") {
-                    status = "placed",
-                        orderStatus = "success"
+                    status = "Placed",
+                        orderStatus = "Success"
+
+                } else if (data.payment_option === 'wallet') {
+                    let userData = await userModel.User.findById({ _id: data.user })
+                    if (userData.wallet < data.total) {
+                        flag = 1
+                        reject(new Error("Insufficient wallet balance!"))
+
+                    } else {
+                        userData.wallet -= data.total
+
+                        await userData.save()
+                        status = 'Placed',
+                            orderStatus = 'Success'
+                    }
+
                 } else {
-                    status = "pending",
-                        orderStatus = "pending"
+                    status = "Pending",
+                        orderStatus = "Pending"
                 }
 
                 let orderData = {
@@ -254,27 +274,32 @@ module.exports = {
                 }
                 let order = await orderModel.Order.findOne({ user: data.user })
 
-                if (order) {
-                    await orderModel.Order.updateOne(
-                        { user: data.user },
-                        {
-                            $push: { orders: orderData }
-                        }
-                    ).then((response) => {
-                        resolve(response)
-                    })
-                } else {
-                    let newOrder = orderModel.Order({
-                        user: data.user,
-                        orders: orderData
-                    })
-                    await newOrder.save().then((response) => {
-                        resolve(response)
+
+                if (flag == 0) {
+                    if (order) {
+                        await orderModel.Order.updateOne(
+                            { user: data.user },
+                            {
+                                $push: { orders: orderData }
+                            }
+                        ).then((response) => {
+                            resolve(response)
+                        })
+                    } else {
+                        let newOrder = orderModel.Order({
+                            user: data.user,
+                            orders: orderData
+                        })
+                        await newOrder.save().then((response) => {
+                            resolve(response)
+                        })
+                    }
+
+                    await cartModel.Cart.deleteMany({ user: data.user }).then(() => {
+                        resolve()
                     })
                 }
-                await cartModel.Cart.deleteMany({ user: data.user }).then(() => {
-                    resolve()
-                })
+
             })
         } catch (error) {
             console.log(error.message);
@@ -287,6 +312,35 @@ module.exports = {
             return new Promise((resolve, reject) => {
                 orderModel.Order.findOne({ user: userId }).then((user) => {
                     resolve(user)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    findOrder: (orderId, userId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
+                    {
+                        $match: {
+                            "orders._id": new ObjectId(orderId),
+                            user: new ObjectId(userId)
+                        }
+                    },
+                    {
+                        $unwind: "$orders"
+                    },
+                ]).then((response) => {
+                    let orders = response.filter((element) => {
+                        if (element.orders._id == orderId) {
+
+                            return true;
+                        }
+                        return false;
+                    }).map((element) => element.orders);
+                    resolve(orders)
                 })
             })
         } catch (error) {
@@ -307,21 +361,61 @@ module.exports = {
                     {
                         $unwind: "$orders"
                     },
+
+
+
+                ]).then((response) => {
+                    let product = response.filter((element) => {
+                        if (element.orders._id == orderId) {
+
+                            return true;
+                        }
+                        return false;
+                    }).map((element) => element.orders.productDetails);
+                    resolve(product)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+
+    findAddress: (orderId, userId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
                     {
-                        $unwind: "$orders.productDetails"
+                        $match: {
+                            "orders._id": new ObjectId(orderId),
+                            user: new ObjectId(userId)
+                        }
                     },
                     {
-                        $replaceRoot: { newRoot: "$orders.productDetails" }
+                        $unwind: "$orders"
+                    },
+                    {
+                        $unwind: "$orders.shippingAddress"
+                    },
+                    {
+                        $replaceRoot: { newRoot: "$orders.shippingAddress.item" }
                     },
                     {
                         $project: {
-                            productId: 1,
-                            productName: 1,
-                            productPrice: 1,
-                            image: 1,
+                            _id: 1,
+                            fname: 1,
+                            lname: 1,
+                            street: 1,
+                            appartment: 1,
+                            city: 1,
+                            state: 1,
+                            zipcode: 1,
+                            phone: 1,
+                            email: 1
                         }
-                    },
+                    }
                 ]).then((response) => {
+                    // console.log(response[0].phone,'[[');
                     resolve(response)
                 })
             })
@@ -384,12 +478,12 @@ module.exports = {
     changePaymentStatus: (userId, orderId) => {
         try {
             return new Promise(async (resolve, reject) => {
-               await orderModel.Order.updateOne(
-                    {"orders._id": orderId },
+                await orderModel.Order.updateOne(
+                    { "orders._id": orderId },
                     {
                         $set: {
-                            "orders.$.orderConfirm": "success",
-                            "orders.$.paymentStatus": "paid"
+                            "orders.$.orderConfirm": "Success",
+                            "orders.$.paymentStatus": "Paid"
                         }
                     }
                 ),
@@ -400,6 +494,351 @@ module.exports = {
         } catch (error) {
             console.log(error.message);
         }
-    }
+    },
 
+    //cancel order
+    cancelOrder: (orderId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.find({ 'orders._id': orderId }).then((orders) => {
+
+                    let orderIndex = orders[0].orders.findIndex(
+                        (orders) => orders._id == orderId
+                    );
+
+                    let order = orders[0].orders.find((order) => order._id == orderId);
+
+                    if (order.paymentMethod === 'razorpay' && order.paymentStatus === 'paid') {
+
+                        orderModel.Order.updateOne(
+                            { 'orders._id': orderId },
+                            {
+
+                                $set: {
+                                    ['orders.' + orderIndex + '.orderConfirm']: 'Canceled',
+                                    ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
+                                }
+                            }
+                        ).then((orders) => {
+                            console.log(orders, '000');
+                            resolve(orders)
+                        })
+                    } else if (order.paymentMethod === 'COD' && order.orderConfirm === 'Delivered' && order.paymentStatus === 'paid') {
+                        orderModel.Order.updateOne(
+                            { 'orders._id': orderId },
+                            {
+                                $set: {
+                                    ['orders.' + orderIndex + '.orderConfirm']: 'Canceled',
+                                    ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
+                                }
+                            }
+                        ).then((orders) => {
+                            console.log(orders, '111');
+                            resolve(orders)
+                        })
+                    } else {
+                        orderModel.Order.updateOne(
+                            { 'orders._id': orderId },
+                            {
+                                $set: {
+                                    ['orders.' + orderIndex + '.orderConfirm']: 'Canceled'
+
+                                }
+                            }
+                        ).then((orders) => {
+                            console.log(orders, '222');
+                            resolve(orders)
+                        })
+                    }
+
+                })
+
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+
+    // return order
+    returnOrder: (orderId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.find({ 'orders._id': orderId }).then((orders) => {
+
+                    let orderIndex = orders[0].orders.findIndex(
+                        (orders) => orders._id == orderId
+                    );
+
+                    orderModel.Order.updateOne(
+                        { 'orders._id': orderId },
+                        {
+                            $set: {
+                                ['orders.' + orderIndex + '.orderConfirm']: 'Returned',
+                                ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
+                            }
+                        }
+                    ).then((orders) => {
+                        console.log(orders, '1');
+                        resolve(orders)
+                    })
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    //to get all orders for admin
+    getAllOrders: () => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.find().then((order) => {
+                    resolve(order)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+
+    //to get the current order
+    getSubOrders: (orderId, userId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
+                    {
+                        $match: {
+                            'user': new ObjectId(userId)
+                        }
+                    },
+                    {
+                        $unwind: '$orders'
+
+                    },
+                    {
+                        $match: {
+                            'orders._id': new ObjectId(orderId)
+                        }
+                    }
+
+                ]).then((order) => {
+                    resolve(order)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    //to get the order address of the user
+    getOrderAddress: (userId, orderId) => {
+        return new Promise((resolve, reject) => {
+            orderModel.Order.aggregate([
+                {
+                    $match: {
+                        "user": new ObjectId(userId)
+                    }
+                },
+                {
+                    $unwind: "$orders"
+                },
+                {
+                    $match: {
+                        "orders._id": new ObjectId(orderId)
+                    }
+                },
+                {
+                    $unwind: "$orders.shippingAddress"
+                },
+                {
+                    $project: {
+                        "shippingAddress": "$orders.shippingAddress"
+                    }
+                }
+            ]).then((address) => {
+                resolve(address)
+            })
+
+        })
+    },
+
+    //to get the ordered products of the user
+    getOrderedProducts: (orderId, userId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
+                    {
+                        $match: {
+                            "user": new ObjectId(userId)
+                        }
+                    },
+                    {
+                        $unwind: "$orders"
+                    },
+                    {
+                        $match: {
+                            "orders._id": new ObjectId(orderId)
+                        }
+                    },
+                    {
+                        $unwind: "$orders.productDetails"
+                    },
+                    {
+                        $project: {
+                            "productDetails": "$orders.productDetails"
+                        }
+                    }
+                ]).then((response) => {
+                    resolve(response)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    // to get the total of a certain product by multiplying with the quantity
+    getTotal: (orderId, userId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
+                    {
+                        $match: {
+                            "user": new ObjectId(userId)
+                        }
+                    },
+                    {
+                        $unwind: "$orders"
+                    },
+                    {
+                        $match: {
+                            "orders._id": new ObjectId(orderId)
+                        }
+                    },
+                    {
+                        $unwind: "$orders.productDetails"
+                    },
+                    {
+                        $project: {
+                            "productDetails": "$orders.productDetails",
+
+                            "totalPrice": { $multiply: ["$orders.productDetails.productPrice", "$orders.productDetails.quantity"] }
+                        }
+                    }
+                ]).then((response) => {
+                    resolve(response)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    //to find the total of the order
+    getOrderTotal: (orderId, userId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
+                    {
+                        $match: {
+                            "user": new ObjectId(userId)
+                        }
+                    },
+                    {
+                        $unwind: "$orders"
+                    },
+                    {
+                        $match: {
+                            "orders._id": new ObjectId(orderId)
+                        }
+                    },
+                    {
+                        $unwind: "$orders.productDetails"
+                    },
+                    {
+                        $group: {
+                            _id: "$orders._id",
+                            totalPrice: { $sum: "$orders.productDetails.productPrice" }
+                        }
+                    }
+
+                ]).then((response) => {
+                    if (response && response.length > 0) {
+                        const orderTotal = response[0].totalPrice
+                        resolve(orderTotal)
+                    }
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    //to change the order status by admin
+    changeOrderStatus: (orderId, status) => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.updateOne(
+                    { 'orders._id': orderId },
+                    {
+                        $set: { 'orders.$.orderConfirm': status }
+                    }).then((response) => {
+                        console.log(response, '$$$$$$$$$$$$$$');
+                        resolve(response)
+                    })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    addWallet: (userId, total) => {
+        try {
+            return new Promise((resolve, reject) => {
+                console.log(userId, total, '--------');
+                userModel.User.updateOne({ _id: userId },
+                    {
+                        $inc: { wallet: total }
+                    }).then((response) => {
+                        resolve(response)
+                    })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    // updatePaymentStatus: (orderId, userId) => {
+    //     try {
+    //         return new Promise((resolve, reject) => {
+    //             orderModel.Order.aggregate([
+    //                 {
+    //                     $match: {
+    //                         'user': new ObjectId(userId)
+    //                     }
+    //                 },
+    //                 {
+    //                     $unwind: '$orders'
+    //                 },
+    //                 {
+    //                     $match: {
+    //                         'orders._id': new ObjectId(orderId)
+    //                     }
+    //                 },
+    //                 {
+    //                     $set: {
+    //                         'orders.paymentStatus': 'refunded'
+    //                     }
+    //                 }
+    //             ]).then((response) => {
+    //                 console.log(response, '$$$$$$$$$$$$$$$');
+    //                 resolve(response)
+    //             })
+    //         })
+    //     } catch (error) {
+    //         console.log(error.message);
+    //     }
+    // }
 }

@@ -5,13 +5,13 @@
         <div class="row product-grid-3">
           <% product.forEach(function(item) { %>
           <div class="col-lg-3 col-md-4">
-          
-              
-              
+
+
+
             <div class="product-cart-wrap mb-30">
               <div class="product-img-action-wrap">
                 <div class="product-img product-img-zoom">
-          
+
                   <a href="/product-detail/<%= item._id%>">
                     <img class="default-img" src="/productImages/<%= item.img[0]%>" alt="">
                     <!-- <img class="hover-img" src="frontEnd/imgs/shop/product-2-2.jpg" alt=""> -->
@@ -20,7 +20,7 @@
                 <div class="product-action-1">
                   <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal">
                     <i class="fi-rs-search"></i></a>
-                  <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#"><i class="fi-rs-heart"></i></a>
+                  <a aria-label="Add To Wishlist" class="action-btn hover-up" href="#" onclick="addToWishList('<%=item._id%>')"><i id="wishlist-icon" class="fi-rs-heart"></i></a>
                   <a aria-label="Compare" class="action-btn hover-up" href="#"><i class="fi-rs-shuffle"></i></a>
                 </div>
                 <!-- <div class="product-badges product-badges-position product-badges-mrg">
@@ -67,17 +67,54 @@
     </div>
 </section>
 
+
 <script>
-  function addToCart(proId){
+  // add to cart ajax call
+  function addToCart(proId) {
     $.ajax({
-      url : '/add-to-cart/' + proId,
-      method : 'POST',
-      data : {
-        proId : proId
+      url: '/add-to-cart/' + proId,
+      method: 'POST',
+      data: {
+        proId: proId
       },
-      success:(response)=>{
-        if(response.status){
+      success: (response) => {
+        if (response.status) {
           location.reload()
+        }
+      }
+    })
+  }
+
+  //add to wish list ajax call
+  function addToWishList(proId) {
+    $.ajax({
+      url: '/add-to-wishlist',
+      method: 'POST',
+      data: {
+        proId: proId
+      },
+      success: (response) => {
+        if (response.status) {
+          // Product added to Wishlist successfully
+          Swal.fire({
+            icon: 'success',
+            title: 'Product added to Wishlist!',
+            showConfirmButton: false,
+            timer: 3000
+          });
+          // Reload page after 3 seconds
+          setTimeout(function() {
+            location.reload();
+          }, 3000);
+
+        } else {
+          // Error adding product to Wishlist
+          Swal.fire({
+            icon: 'error',
+            title: 'Product already exist in Wishlist',
+            timer: 3000
+          });
+
         }
       }
     })

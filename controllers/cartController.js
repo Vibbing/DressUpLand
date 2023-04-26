@@ -2,6 +2,7 @@ const express = require('express')
 const cartModel = require('../schema/models')
 const cartHelpers = require('../helpers/cartHelpers')
 const orderHelpers = require('../helpers/orderHelpers')
+const wishListHelpers = require('../helpers/wishlistHelpers')
 
 
 module.exports = {
@@ -11,10 +12,11 @@ module.exports = {
         let userId = req.session.user._id
         let user = req.session.user
         let count = await cartHelpers.getCartCount(user._id)
+        const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         let total = await orderHelpers.totalCheckOutAmount(userId)
         let subTotal = await orderHelpers.getSubTotal(userId)
         cartHelpers.getCartItems(userId).then((cartItems) => {
-            res.render('user/cart', { user, cartItems, subTotal, total, count })
+            res.render('user/cart', { user, cartItems, subTotal, total, count, wishlistCount })
         })
     },
 

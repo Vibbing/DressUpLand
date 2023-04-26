@@ -1,6 +1,5 @@
-
 <head>
- 
+
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
@@ -44,17 +43,17 @@
               <td><%= index + 1 %></td>
               <td><%=  item._id%> </td>
               <td><%=  item.category%></td>
-              <td><button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Sub Category List
-              </button>
-              
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <% item.sub_category.forEach(function(item) { %>
-                <a class="dropdown-item" href="#"><%=  item%></a>
-                 <% }) %>
-              </div>
-             
-              
+              <td><button class="btn btn-secondary btn-sm " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  
+                </button>
+
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <% item.sub_category.forEach(function(item) { %>
+                  <a class="dropdown-item" href="#"><%=  item%></a>
+                  <% }) %>
+                </div>
+
+
               </td>
 
 
@@ -149,7 +148,7 @@
             method: 'post',
             data: {
               category: category,
-              sub_category : subCategory
+              sub_category: subCategory
 
             },
             success(response) {
@@ -181,41 +180,41 @@
 
 <!-- edit category  -->
 <div class="modal">
-  <div class="modal-dialog">
+  <div class="modal-dialog rounded">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Stock Modal</h5>
+        <h5 class="modal-title text-center">Stock Modal</h5>
         <button type="button" class="close" data-dismiss="modal">
           <span>&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <div class="card">
+        <div class="card rounded">
           <div class="card-body">
             <div class="row justify-content-center">
               <div class="col-lg-6 ">
                 <form id="edit-category-form">
                   <div class="mb-4">
-                    
                     <label for="product_name" class="form-label">Category</label>
-                 
-                    <input id="editCategory" disabled="" type="text" placeholder="Type here" name="category" class="form-control" />
-                    
-                    <select>
-                      <option value="">Sub Category</option>
-                     
-                       
-                      <option id="subCat"></option>
-                  
-                      
+                    <input id="editCategory" disabled="" type="text" placeholder="Type here" name="category" class="form-control rounded" />
+                    <select id="subCatSelect" class="form-select">
+
+                      <option value=""></option>
+
                     </select>
-                    
-                    <input style="display: none;" id="editCategoryId" type="text" placeholder="Type here" name="_id" class="form-control" />
+
+                    <div class="mt-2">
+                      <input id="newSubCatInput" type="text" placeholder="New subcategory" name="newSubCat" class="form-control rounded" />
+                      <button id="addSubCatBtn" type="submit" class="btn btn-primary rounded">Add</button>
+                      <button id="removeSubCatBtn" type="button" class="btn btn-danger rounded">Remove</button>
+                    </div>
+                    <input style="display: none;" id="editCategoryId" type="text" placeholder="Type here" name="_id" class="form-control rounded" />
                     <p id="err" class="text-danger"></p>
                   </div>
-                  <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Update category</button>
-                  </div>
+
+                  <!-- <div class="d-grid">
+                    <button type="submit" class="btn btn-primary rounded">Update category</button>
+                  </div> -->
                 </form>
               </div>
             </div> <!-- .row // -->
@@ -228,6 +227,7 @@
 
 
 <script>
+  //post edit subcategory
   $(document).ready(function() {
     // Show modal on button click
     $('#showModal').click(function() {
@@ -260,7 +260,7 @@
     })
   });
 
-  //edit category
+  //get edit subcategory
 
   function editCategory(categoryId) {
     $.ajax({
@@ -269,11 +269,59 @@
     }).done(res => {
       $('#editCategory').val(res.category);
       $('#editCategoryId').val(res._id);
+      // Clear any existing options
+      $('#subCatSelect').empty();
+
+      // Add each option to the select element
+      $.each(res.sub_category, function(index, value) {
+        $('#subCatSelect').append($('<option>', {
+          value: value,
+          text: value
+        }));
+      });
       $('.modal').show()
+      //to display the values in the select option to the subcatergory input
+      $('#subCatSelect').on('change', function() {
+        const selectedOption = $(this).find('option:selected').val();
+        $('#newSubCatInput').val(selectedOption);
+      });
     }).fail(err => {
 
     })
   }
+
+  //remove sub category
+  $('#removeSubCatBtn').on('click', function() {
+    const categoryId = $('#editCategoryId').val()
+
+    swal({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result) {
+        $.ajax({
+          url: '/admin/remove-subCategory/' + categoryId,
+          method: 'DELETE',
+          data: $('#edit-category-form').serialize(),
+          success: (response) => {
+            swal({
+              icon: 'success',
+              title: 'Subcategory has been removed',
+              showConfirmButton: false,
+              timer: 1500
+            }).then(() => {
+              location.reload()
+            })
+          }
+        })
+      }
+    })
+  })
 
   //delete category
   function deleteCategory(catId) {
@@ -330,4 +378,5 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: -1;
   }
+  
 </style>

@@ -30,15 +30,17 @@
           <div class="header-action-right">
             <div class="header-action-2">
               <div class="header-action-icon-2">
-                <a href="shop-wishlist.html">
+                <% if (locals?.user) { %>
+                <a href="/wish-list">
                   <img class="svgInject" alt="Evara" src="/frontEnd/imgs/theme/icons/icon-heart.svg">
-                  <span class="pro-count blue">4</span>
+                  <span class="pro-count blue"><%=wishlistCount%></span>
                 </a>
+                <% } %>
               </div>
             
              
               <div class="header-action-icon-2">
-                <% if (locals.user) { %>
+                <% if (locals?.user) { %>
                   <a class="mini-cart-icon" href="/cart-list">
                     <img alt="Evara" src="/frontEnd/imgs/theme/icons/icon-cart.svg">
                     <span class="pro-count blue"><%=count%></span>
@@ -86,7 +88,7 @@
           </div>
 
           <div class="header-action-right ml-30">
-            <% if (locals.user) { %>
+            <% if (locals?.user) { %>
             
               <a href="/logout"> <i class="fas fa-right-from-bracket fa-2x"></i></a>
          
@@ -100,7 +102,7 @@
           </div>
 
           <div class="header-action-right ml-10">
-            <% if (locals.user) { %>
+            <% if (locals?.user) { %>
             
          <a href="/get-profile"><i class="fa-solid fa-user fa-2x"></i></a> 
 

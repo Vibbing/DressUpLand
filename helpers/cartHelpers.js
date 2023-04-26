@@ -95,6 +95,7 @@ module.exports = {
                     }
                 ])
                     .then((cartItems) => {
+                        console.log(cartItems,'++++++++++++++++++');
                         resolve(cartItems)
                     })
             })
