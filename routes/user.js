@@ -75,5 +75,7 @@ router.route('/add-to-wishlist').post(userController.addWishList)
 
 router.route('/remove-product-wishlist').delete(userController.removeProductWishlist)
 
+router.route('/change-user-data/:id').post(userController.changeUserData)
+
 
 module.exports = router;

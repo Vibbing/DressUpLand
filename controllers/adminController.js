@@ -4,6 +4,7 @@ const adminHelpers = require('../helpers/adminHelpers')
 const { Product } = require('../schema/models')
 const orderHelpers = require('../helpers/orderHelpers')
 const userController = require('./userController')
+const couponHelpers = require('../helpers/couponHelpers')
 
 
 module.exports = {
@@ -45,7 +46,9 @@ module.exports = {
     changeUserStatus: (req, res) => {
         let userId = req.query.id
         let status = req.query.status
-        console.log(req.query);
+        if(status === 'false'){
+            req.session.user = null
+        }
         adminHelpers.changeUserStatus(userId, status).then(() => {
             res.send(status)
         })
@@ -245,6 +248,37 @@ module.exports = {
     /* GET Add Coupon Page. */
     getAddCoupon:(req,res)=>{
         res.render('admin/addCoupon',{layout : 'adminLayout'})
+    },
+
+    /* GET Generate Coupon Code Page. */
+    generatorCouponCode:(req,res)=>{
+        couponHelpers.generatorCouponCode().then((couponCode)=>{
+            console.log(couponCode,'-----');
+            res.send(couponCode)
+        })
+    },
+
+    /* Post Add Coupone Page. */
+    postaddCoupon:(req,res)=>{
+        let data = {
+            couponCode : req.body.coupon,
+            validity : req.body.validity,
+            minAmount : req.body.minAmount,
+            minDiscountPercentage : req.body.minDiscountPercentage,
+            maxDiscountValue : req.body.maxDiscount,
+            description : req.body.description
+        }
+        couponHelpers.postaddCoupon(data).then((response)=>{
+            res.send(response)
+        })
+    },
+
+    /* GET Coupon List Page. */
+    getCouponList:(req,res)=>{
+        let admin = req.session.admin
+        couponHelpers.getCouponList().then((couponList)=>{
+            res.render('admin/couponList',{layout : 'adminLayout', admin, couponList})
+        })
     }
     // errorPage:(req,res)=>{
     //     res.render('error',{layout : 'adminlayout'})

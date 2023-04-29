@@ -72,7 +72,13 @@ router.route('/order-details').get(auth.adminAuth, adminController.getOrderDetai
 router.route('/change-order-status').post(orderControllers.changeOrderStatus)
 
 /* GET Add Coupon Page. */
-router.route('/add-coupon').get(auth.adminAuth,adminController.getAddCoupon)
+router.route('/add-coupon').get(auth.adminAuth,adminController.getAddCoupon).post(adminController.postaddCoupon)
+
+/* GET Generate Coupon Code Page. */
+router.route('/generate-coupon-code').get(auth.adminAuth,adminController.generatorCouponCode)
+
+/* GET Coupon List Page. */
+router.route('/coupon-list').get(auth.adminAuth,adminController.getCouponList)
 
 
 /* GET error Page. */

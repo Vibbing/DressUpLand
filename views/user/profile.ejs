@@ -40,16 +40,54 @@
                 <div class="tab-pane fade active show" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
                   <div class="card">
                     <div class="card-header">
-                      <h5 class="mb-0"><%=user.name%></h5>
+                      <h5 class="mb-0">Welcome <%=userData.name%>!</h5>
                     </div>
                     <div class="card-body">
-                      <p>From your account dashboard. you can easily check &amp; view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a> and <a href="#">edit your password and account details.</a></p>
+                      <form>
+                        <div class="row">
+                          <div class="col-lg-12">
+                            <div class="row gx-3">
+                              <div class="col-6  mb-3">
+                                <label class="form-label">User Name</label>
+                                <input class="form-control" id="userName" value="<%=userData.name%>" type="text" placeholder="Type here">
+                                <p id="error1" class="text-danger"></p>
+                              </div> <!-- col .// -->
+                              <div class="col-lg-6  mb-3">
+                                <label class="form-label">Email</label>
+                                <input class="form-control" id="email" value="<%=userData.email%>" type="email" placeholder="example@mail.com">
+                                <p id="error2" class="text-danger"></p>
+                              </div> <!-- col .// -->
+                              <div class="col-lg-6  mb-3">
+                                <label class="form-label">Phone</label>
+                                <input class="form-control" id="mobile" value="<%=userData.mobile%>" type="tel" placeholder="Type here">
+                                <p id="error3" class="text-danger"></p>
+                              </div> <!-- col .// -->
+                              <div class="col-6  mb-3">
+                                <label class="form-label">Wallet Balance</label>
+                                <input class="form-control" disabled value="<%=userData.wallet%>" type="number">
+                              </div> <!-- col .// -->
+                              <!-- <div class="col-lg-12  mb-3">
+                                <label class="form-label">Address</label>
+                                <input class="form-control" type="text" placeholder="Type here">
+                              </div> col .// -->
+                              <!-- <div class="col-lg-6  mb-3">
+                                <label class="form-label">Birthday</label>
+                                <input class="form-control" type="date">
+                              </div> col .// -->
+                            </div> <!-- row.// -->
+                          </div> <!-- col.// -->
+
+                        </div> <!-- row.// -->
+                        <br>
+                        <button class="btn btn-primary" type="button" onclick="changeUserData('<%=user._id%>')">Save changes</button>
+                      </form>
                     </div>
                   </div>
                 </div>
+
                 <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                
-                    
+
+
                   <div class="card-body">
                     <div class="table-responsive custom-table">
                       <table class="table table-custom">
@@ -86,8 +124,8 @@
                       </table>
                     </div>
                   </div>
-                  
-                  
+
+
                 </div>
                 <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
                   <div class="card">
@@ -243,7 +281,7 @@
 
 
 <style>
-  p#err {
+  p {
     font-size: 12px;
   }
 
@@ -254,54 +292,49 @@
 
   /* Details button */
   #details {
-  
-  color: #000000;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-}
 
-#details:hover {
-  background-color: #171616;
-}
+    color: #000000;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
 
-/* order list table  */
-.table-custom {
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-}
+  #details:hover {
+    background-color: #171616;
+  }
 
-.table-custom th {
-  background-color: #f2f2f2;
-  color: #333333;
-  font-weight: bold;
-}
+  /* order list table  */
+  .table-custom {
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+  }
 
-.table-custom td {
-  padding: 10px;
-}
+  .table-custom th {
+    background-color: #f2f2f2;
+    color: #333333;
+    font-weight: bold;
+  }
 
-.table-custom a {
-  color: #ffffff;
-  text-decoration: none;
-  background-color: #a8729a;
-  padding: 5px 10px;
-  border-radius: 5px;
-}
+  .table-custom td {
+    padding: 10px;
+  }
 
-.table-custom a:hover {
-  background-color: #8c5f83;
-}
+  .table-custom a {
+    color: #ffffff;
+    text-decoration: none;
+    background-color: #a8729a;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
 
-
-
-
-
+  .table-custom a:hover {
+    background-color: #8c5f83;
+  }
 </style>
 <script>
   // for adding new address
@@ -450,13 +483,70 @@
 
 
 
+  //ajax call for updating user data
 
-  // ajax call for returning order
+  function changeUserData(userId) {
 
-  function returnOrder(orderId){
+    const userName = document.getElementById('userName')
+    const email = document.getElementById('email')
+    const mobile = document.getElementById('mobile')
+
+    const userNameValue = userName.value.trim()
+    const emailValue = email.value.trim()
+    const mobileValue = mobile.value.trim()
+
+    let error1 = userName.parentElement.querySelector('p')
+    let error2 = email.parentElement.querySelector('p')
+    let error3 = mobile.parentElement.querySelector('p')
+
+    error1.innerText = ''
+    error2.innerText = ''
+    error3.innerText = ''
+
+    let flag = 1
+
+    if (userNameValue == '') {
+      error1.innerText = "UserName is required"
+      flag = 2
+    }
+
+    if (emailValue == '') {
+      error2.innerText = "Email is required"
+      flag = 2
+    }
+
+    if (mobileValue == '') {
+      error3.innerText = "Mobile Number is required"
+      flag = 2
+    }
+
+    if (flag == 1) {
+      submit(userNameValue, emailValue, mobileValue)
+    }
+  }
+
+  function submit(userName, email, mobile) {
     $.ajax({
-      url: '/return-order/' + orderId,
-      method: 'POST'
+      url: '/change-user-data/' + '<%=user._id%>',
+      method: 'POST',
+      data: {
+        userName: userName,
+        email: email,
+        mobile: mobile
+      },
+      success: (updatedUserData) => {
+        location.reload()
+      }
     })
   }
+
+
+  // // ajax call for returning order
+
+  // function returnOrder(orderId) {
+  //   $.ajax({
+  //     url: '/return-order/' + orderId,
+  //     method: 'POST'
+  //   })
+  // }
 </script>

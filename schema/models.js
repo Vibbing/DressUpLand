@@ -161,6 +161,25 @@ const wishListSchema = new mongoose.Schema({
     ]
 })
 
+const couponSchema = new mongoose.Schema({
+    couponCode: {
+        type: String
+    },
+    validity: {
+        type: Date,
+        default : new Date
+     },
+     minPurchase : { type : Number },
+     minDiscountPercentage : { type : Number },
+     maxDiscountValue : { type : Number},
+     description : { type : String},
+     createdAt : {
+        type : Date,
+        default : new Date
+     }
+
+})
+
 module.exports = {
     User: mongoose.model('user', userSchema),
     Admin: mongoose.model('admin', adminSchema),
@@ -169,6 +188,7 @@ module.exports = {
     Cart: mongoose.model('cart', cartSchema),
     Address: mongoose.model('address', addressSchema),
     Order: mongoose.model('order', orderSchema),
-    Wishlist: mongoose.model('wishlist', wishListSchema)
+    Wishlist: mongoose.model('wishlist', wishListSchema),
+    Coupon : mongoose.model('coupon', couponSchema)
 
 }

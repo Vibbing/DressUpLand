@@ -68,34 +68,68 @@ module.exports = {
         })
     },
     /* GET Shop Page. */
-    getShop:()=>{
-    try {
-        return new Promise((resolve,reject)=>{
-            productModel.Product.find().then((product)=>{
-                if(product){
-                    resolve(product)
-                }else{
-                    console.log('product not found');
-                }
+    getShop: () => {
+        try {
+            return new Promise((resolve, reject) => {
+                productModel.Product.find().then((product) => {
+                    if (product) {
+                        resolve(product)
+                    } else {
+                        console.log('product not found');
+                    }
+                })
             })
-        })
-    } catch (error) {
-        console.log(error.message);
-    }
-},
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
 
-/* GET Product Detail Page. */
-getProductDetail:(proId)=>{
-    try {
-        return new Promise((resolve,reject)=>{
-            productModel.Product.findById({_id : proId}).then((response)=>{
-               resolve(response)
+    /* GET Product Detail Page. */
+    getProductDetail: (proId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                productModel.Product.findById({ _id: proId }).then((response) => {
+                    resolve(response)
+                })
             })
-        })
-    } catch (error) {
-        console.log(error.message);
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    getUser: (userId) => {
+        try {
+            return new Promise((resolve, reject) => {
+                userModel.User.findById({ _id: userId }).then((response) => {
+                    resolve(response)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    changeUserData: (userId, data) => {
+        try {
+            return new Promise((resolve, reject) => {
+                userModel.User.updateOne(
+                    { _id: userId },
+                    {
+                        $set: {
+                            name: data.userName,
+                            email: data.email,
+                            mobile: data.mobile
+                        }
+                    }
+                ).then((response) => {
+                    console.log(response);
+                    resolve(response)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
     }
-}
 
 }
 

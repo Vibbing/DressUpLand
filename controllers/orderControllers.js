@@ -3,6 +3,7 @@ const cartHelpers = require('../helpers/cartHelpers')
 const orderHelpers = require('../helpers/orderHelpers')
 const wishListHelpers = require('../helpers/wishlistHelpers')
 const { response } = require('../app')
+const userHelper = require('../helpers/userHelper')
 
 
 module.exports = {
@@ -15,10 +16,11 @@ module.exports = {
         if (user) {
             var count = await cartHelpers.getCartCount(user._id)
             var wishlistCount = await wishListHelpers.getWishListCount(user._id)
+            let userData = await userHelper.getUser(user._id)
             let address = await orderHelpers.getAddress(user._id)
             let orders = await orderHelpers.getOrders(user._id)
             // let product = await orderHelpers.getProduct()
-            res.render('user/profile', { user, count, address, orders, wishlistCount })
+            res.render('user/profile', { user, userData, count, address, orders, wishlistCount })
         }
 
     },

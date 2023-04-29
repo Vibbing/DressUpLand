@@ -59,69 +59,117 @@
   </div>
 </div>
 
+<style>
+     p {
+    font-size: 12px;
+  }
+</style>
 
 <script>
+    function validatorCoupen(){
+  const couponName = document.getElementById('couponName')
+  const validity = document.getElementById('validity')
+  const minAmount = document.getElementById('minAmount')
+  const discountPercentage = document.getElementById('discountPercentage')
+  const maxDiscount = document.getElementById('maxDiscountValue')
+  const description = document.getElementById('description')
 
-const couponName = document.getElementById('couponName')
-const validity = document.getElementById('validity')
-const minAmount = document.getElementById('minAmount')
-const discountPercentage = document.getElementById('discountPercentage')
-const maxDiscountValue = document.getElementById('maxDiscountValue')
-const description = document.getElementById('description')
+  const couponNameValue = couponName.value.trim()
+  const validityValue = validity.value.trim()
+  const minAmountValue = minAmount.value.trim()
+  const discountPercentageValue = discountPercentage.value.trim()
+  const maxDiscountValue = maxDiscount.value.trim()
+  const descriptionValue = description.value.trim()
 
-const couponNameValue = couponName.value.trim()
-const validityValue = validity.value.trim()
-const minAmountValue = minAmount.value.trim()
-const discountPercentageValue = discountPercentage.value.trim()
-const maxDiscountValueValue = maxDiscount.value.trim()
-const descriptionValue = description.value.trim()
+  const error1 = couponName.parentElement.querySelector('p')
+  const error2 = validity.parentElement.querySelector('p')
+  const error3 = minAmount.parentElement.querySelector('p')
+  const error4 = discountPercentage.parentElement.querySelector('p')
+  const error5 = maxDiscount.parentElement.querySelector('p')
+  const error6 = description.parentElement.querySelector('p')
 
-const error1 = couponName.parentElement.querySelector('p')
-const error2 = validity.parentElement.querySelector('p')
-const error3 = minAmount.parentElement.querySelector('p')
-const error4 = discountPercentage.parentElement.querySelector('p')
-const error5 = maxDiscount.parentElement.querySelector('p')
-const error6 = description.parentElement.querySelector('p')
+  error1.innerText = ''
+  error2.innerText = ''
+  error3.innerText = ''
+  error4.innerText = ''
+  error5.innerText = ''
+  error6.innerText = ''
 
-error1.innerText = ''
-error2.innerText = ''
-error3.innerText = ''
-error4.innerText = ''
-error5.innerText = ''
-error6.innerText = ''
+  let flag = 1
 
-let flag = 1
-
-if(couponNameValue = ''){
+  if (couponNameValue == '') {
     error1.innerText = 'Coupon code is required'
     flag = 2
-}else if(validityValue = ''){
+  }
+  if (validityValue == '') {
     error2.innerText = 'Validity is required'
     flag = 2
-}else if(minAmountValue = ''){
+  }
+  if (minAmountValue == '') {
     error3.innerText = 'Minimum amount is required'
     flag = 2
-}else if(discountPercentageValue = ''){
+  }
+  if (discountPercentageValue == '') {
     error4.innerText = 'Discount percentage is required'
     flag = 2
-}else if(maxDiscountValue = ''){
+  }
+  if (maxDiscountValue == '') {
     error5.innerText = 'Maximum discount is required'
     flag = 2
-}else if(descriptionValue = ''){
+  }
+  if (descriptionValue == '') {
     error6.innerText = 'Description is required'
     flag = 2
+  }
+
+  if (flag == 1) {
+    submit(couponNameValue, validityValue, minAmountValue, discountPercentageValue, maxDiscountValue, descriptionValue)
+  }
 }
- 
-if(flag == 1){
-    submit(couponNameValue,validityValue,minAmountValue,discountPercentageValue,maxDiscountValue,descriptionValue)
-}
 
-
-
-function generateCoupon(){
+function submit(coupon, validity, minAmount, minDiscountPercentage, maxDiscount, description){
     $.ajax({
-        url : '/admin/generate-coupon-code',
-        method : 'GET'
+        url : '/admin/add-coupon',
+        method : 'POST',
+        data : {
+            coupon : coupon,
+            validity : validity,
+            minAmount : minAmount,
+            minDiscountPercentage : minDiscountPercentage,
+            maxDiscount : maxDiscount,
+            description : description
+        },
+        success:(response)=>{
+            if(response.status){
+                swal({
+                    icon: 'success',
+                    title: 'Coupon Added Successfully!',
+                    showConfirmButton: false,
+                    timer: 5000
+                }).then(() => {
+                    location.href = '/admin/coupon-list';
+                });
+            }else{
+                swal({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Coupon Code already exists!',
+                    timer: 5000
+                });
+            }
+        }
     })
 }
+
+
+  function generateCoupon() {
+    $.ajax({
+      url: '/admin/generate-coupon-code',
+      method: 'GET',
+      success: (response) => {
+        document.getElementById('couponName').value = response.couponCode;
+      }
+
+    })
+  }
 </script>

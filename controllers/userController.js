@@ -157,5 +157,13 @@ module.exports = {
         wishListHelpers.removeProductWishlist(proId,wishListId).then((response)=>{
             res.send(response)
         })
+    },
+
+    changeUserData:(req,res)=>{
+        let userId = req.params.id
+        let data = req.body
+        userHelper.changeUserData(userId,data).then((updatedUserData)=>{
+            res.send(updatedUserData)
+        })
     }
 }
