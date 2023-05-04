@@ -28,6 +28,7 @@
                 <tr>
                   <th>No:</th>
                   <th>Coupon Code</th>
+                  <th>Min Purchase Amount</th>
                   <th>Discount %</th>
                   <th>Max Discount Amount</th>
                   <th>Expiry Date</th>
@@ -40,11 +41,12 @@
                 <tr>
                   <td><%=index + 1%></td>
                   <td><%=item.couponCode%></td>
+                  <td><%=item.minPurchase%></td>
                   <td><%=item.minDiscountPercentage%>%</td>
                   <td>₹<%=item.maxDiscountValue%></td>
                   <td><%= new Date(item.validity).toDateString()%></td>
                   <td class="text-end">
-                    <a href="#" class="btn btn-sm btn-light font-sm rounded">Details</a>
+                    <button class="btn-sm btn-danger" onclick="removeCoupon('<%=item._id%>')">Remove</button>
                   </td>
                 </tr>
 
@@ -70,3 +72,20 @@
     </nav>
   </div>
 </section>
+
+<script>
+  
+  //to remove the Coupon
+ function removeCoupon(couponId){
+  $.ajax({
+    url : '/admin/remove-coupon',
+    method : 'delete',
+    data : {
+      couponId : couponId
+    },
+    success:(successResponse)=>{
+      location.reload()
+    }
+  })
+ }
+</script>

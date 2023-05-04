@@ -341,7 +341,9 @@
               if (response.status) {
                 swal("Category has been deleted!", {
                   icon: "success",
-                });
+                }).then(()=>{
+                  location.reload()
+                })
               } else {
                 swal("Oops!", "Something went wrong. Category not deleted!", "error");
               }

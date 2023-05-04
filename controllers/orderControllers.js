@@ -4,6 +4,7 @@ const orderHelpers = require('../helpers/orderHelpers')
 const wishListHelpers = require('../helpers/wishlistHelpers')
 const { response } = require('../app')
 const userHelper = require('../helpers/userHelper')
+const couponHelpers = require('../helpers/couponHelpers')
 
 
 module.exports = {
@@ -50,9 +51,14 @@ module.exports = {
 
     /* POST Check Out Page */
     postCheckOut: async (req, res) => {
+        console.log(req.body, 'body');
         try {
+            let userId = req.session.user._id
             let data = req.body;
-            let total = data.total
+            let total = data.discountedAmount
+            let couponCode = data.couponCode
+            console.log(total,couponCode,'---------');
+            await couponHelpers.addCouponToUser(couponCode, userId)
             await orderHelpers.placeOrder(data).then(async (response) => {
                 if (data.payment_option === "COD") {
                     res.json({ codStatus: true });
@@ -80,7 +86,7 @@ module.exports = {
             orderHelpers.findAddress(orderId, userId).then((address) => {
                 orderHelpers.findProduct(orderId, userId).then((product) => {
                     console.log(orders, '====');
-                    res.render('user/orderDetails', { user, count, product, address, orders, orderId, wishlistCount})
+                    res.render('user/orderDetails', { user, count, product, address, orders, orderId, wishlistCount })
                 })
             })
         })
@@ -88,7 +94,7 @@ module.exports = {
 
     verifyPayment: (req, res) => {
         orderHelpers.verifyPayment(req.body).then(() => {
-            orderHelpers.changePaymentStatus(req.session.user._id, req.body["order[receipt]"])
+            orderHelpers.changePaymentStatus(req.session.user._id, req.body["order[receipt]"], req.body["payment[razorpay_payment_id]"])
                 .then(() => {
                     res.json({ status: true })
                 })
@@ -104,10 +110,10 @@ module.exports = {
         let userId = req.session.user._id
         console.log(orderId, req.query.total, req.session.user._id);
         orderHelpers.cancelOrder(orderId).then((canceled) => {
-            orderHelpers.addWallet(userId, total).then((walletStatus) => {
-                console.log(canceled, 'cancel', walletStatus, 'wallet');
-                res.send(canceled)
-            })
+            // orderHelpers.addWallet(userId, total).then((walletStatus) => {
+            // console.log(canceled, 'cancel', walletStatus, 'wallet');
+            res.send(canceled)
+            // })
         })
     },
 

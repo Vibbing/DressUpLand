@@ -129,7 +129,90 @@ module.exports = {
         } catch (error) {
             console.log(error.message);
         }
-    }
+    },
+
+    // getQueriesOnShop: (query) => {
+    //     const search = query?.search
+    //     const sort = query?.sort
+    //     const filter = query?.filter
+    //     const page = parseInt(query?.page) || 1
+    //     const perPage = 10
+
+    //     // console.log(search, sort, filter, page, perPage)
+
+    //         return new Promise( async(resolve, reject) =>{
+
+    //             let filterObj = {}
+    
+    //             if (filter === 'catergory=men') {
+    //                 filterObj = { catergory: 'men' }
+    //             } else if (filter === 'category=women') {
+    //                 filterObj = { category: 'women' }
+    //             } else if (filter === 'category=kids') {
+    //                 filterObj = { category: 'kids' }
+    //             }
+    
+    //             //Building search query
+    
+    //             let searchQuery = {}
+    
+    //             if (search) {
+    //                 searchQuery = {
+    //                     $or: [
+    //                         { name: { $regex: search, $options: 'i' } },
+    //                         { description: { $regex: search, $options: 'i' } }
+    //                     ]
+    //                 }
+    //             }
+    
+    //             //Building object based on query parameter
+    
+    //             let sortObj = {}
+    
+    //             if (sort === '-createdAt') {
+    //                 sortObj = { createdAt: -1 };
+    //             } else if (sort === 'createdAt') {
+    //                 sortObj = { createdAt: 1 };
+    //             } else if (sort === '-price') {
+    //                 sortObj = { price: -1 };
+    //             } else if (sort === 'price') {
+    //                 sortObj = { price: 1 };
+    //             }
+    
+    //             const skip = (page - 1) * perPage;
+    
+    //             const product = await productModel.Product.find({
+    //                 ...searchQuery,
+    //                 ...filterObj,
+    //             })
+    //                 .sort(sortObj)
+    //                 .skip(skip)
+    //                 .limit(perPage);
+    
+    
+    //             const totalProducts = await productModel.Product.countDocuments({
+    //                 ...searchQuery,
+    //                 ...filterObj,
+    //             });
+    
+    //            console.log(filterObj,'filterObj');
+    //            console.log(searchQuery,'searchQuery');
+    //            console.log(sortObj,'sortObj');
+    //            console.log(skip,'skip');
+    //            console.log(product,'product');
+    //            console.log(totalProducts,'totalProducts');
+    
+    //             const totalPages = Math.ceil(totalProducts / perPage);
+    
+    //             resolve({
+    //                 product,
+    //                 currentPage: page,
+    //                 totalPages,
+    //               });
+
+    //         })    
+
+    // }
 
 }
 

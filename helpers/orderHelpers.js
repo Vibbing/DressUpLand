@@ -246,12 +246,12 @@ module.exports = {
 
                 } else if (data.payment_option === 'wallet') {
                     let userData = await userModel.User.findById({ _id: data.user })
-                    if (userData.wallet < data.total) {
+                    if (userData.wallet < data.discountedAmount) {
                         flag = 1
                         reject(new Error("Insufficient wallet balance!"))
 
                     } else {
-                        userData.wallet -= data.total
+                        userData.wallet -= data.discountedAmount
 
                         await userData.save()
                         status = 'Placed',
@@ -270,7 +270,7 @@ module.exports = {
                     productDetails: productDetails,
                     shippingAddress: Address,
                     orderStatus: orderStatus,
-                    totalPrice: data.total
+                    totalPrice: data.discountedAmount
                 }
                 let order = await orderModel.Order.findOne({ user: data.user })
 
@@ -425,6 +425,7 @@ module.exports = {
     },
 
     generateRazorpay(userId, total) {
+        console.log(total,'razortotal');
         try {
             return new Promise(async (resolve, reject) => {
                 let orders = await orderModel.Order.find({ user: userId })
@@ -475,7 +476,8 @@ module.exports = {
     },
 
     // change payment status
-    changePaymentStatus: (userId, orderId) => {
+    changePaymentStatus: (userId, orderId, paymentId) => {
+        console.log(paymentId,'data----');
         try {
             return new Promise(async (resolve, reject) => {
                 await orderModel.Order.updateOne(
@@ -483,7 +485,8 @@ module.exports = {
                     {
                         $set: {
                             "orders.$.orderConfirm": "Success",
-                            "orders.$.paymentStatus": "Paid"
+                            "orders.$.paymentStatus": "Paid",
+                            "orders.$.paymentId": paymentId
                         }
                     }
                 ),
@@ -501,29 +504,44 @@ module.exports = {
         try {
             return new Promise((resolve, reject) => {
                 orderModel.Order.find({ 'orders._id': orderId }).then((orders) => {
-
-                    let orderIndex = orders[0].orders.findIndex(
-                        (orders) => orders._id == orderId
-                    );
-
+                    let orderIndex = orders[0].orders.findIndex((orders) => orders._id == orderId);
                     let order = orders[0].orders.find((order) => order._id == orderId);
 
-                    if (order.paymentMethod === 'razorpay' && order.paymentStatus === 'paid') {
-
-                        orderModel.Order.updateOne(
-                            { 'orders._id': orderId },
-                            {
-
-                                $set: {
-                                    ['orders.' + orderIndex + '.orderConfirm']: 'Canceled',
-                                    ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
-                                }
+                    if (order.paymentMethod === 'razorpay' && order.paymentStatus === 'Paid') {
+                        // Fetch payment details from Razorpay API
+                        instance.payments.fetch(order.paymentId).then((payment) => {
+                            console.log(payment,'payment');
+                            if (payment.status === 'captured') {
+                                // Initiate refund using the payment ID and refund amount
+                                instance.payments.refund(order.paymentId, { amount: order.totalPrice * 100 }).then((refund) => {
+                                    console.log(refund, 'refund');
+                                    // Update order status in the database
+                                    orderModel.Order.updateOne(
+                                        { 'orders._id': orderId },
+                                        {
+                                            $set: {
+                                                ['orders.' + orderIndex + '.orderConfirm']: 'Canceled',
+                                                ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
+                                            }
+                                        }
+                                    ).then((orders) => {
+                                        console.log(orders, '000');
+                                        resolve(orders)
+                                    });
+                                }).catch((error) => {
+                                    console.log(error);
+                                    reject(error);
+                                });
+                            } else {
+                                console.log('Payment not captured');
+                                reject('Payment not captured');
                             }
-                        ).then((orders) => {
-                            console.log(orders, '000');
-                            resolve(orders)
-                        })
+                        }).catch((error) => {
+                            console.log(error);
+                            reject(error);
+                        });
                     } else if (order.paymentMethod === 'COD' && order.orderConfirm === 'Delivered' && order.paymentStatus === 'paid') {
+                        // Update order status in the database
                         orderModel.Order.updateOne(
                             { 'orders._id': orderId },
                             {
@@ -535,29 +553,28 @@ module.exports = {
                         ).then((orders) => {
                             console.log(orders, '111');
                             resolve(orders)
-                        })
+                        });
                     } else {
+                        // Update order status in the database
                         orderModel.Order.updateOne(
                             { 'orders._id': orderId },
                             {
                                 $set: {
                                     ['orders.' + orderIndex + '.orderConfirm']: 'Canceled'
-
                                 }
                             }
                         ).then((orders) => {
                             console.log(orders, '222');
                             resolve(orders)
-                        })
+                        });
                     }
-
-                })
-
-            })
+                });
+            });
         } catch (error) {
             console.log(error.message);
         }
     },
+
 
 
     // return order

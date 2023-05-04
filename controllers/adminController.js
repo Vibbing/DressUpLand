@@ -247,7 +247,8 @@ module.exports = {
 
     /* GET Add Coupon Page. */
     getAddCoupon:(req,res)=>{
-        res.render('admin/addCoupon',{layout : 'adminLayout'})
+        let admin = req.session.admin
+        res.render('admin/addCoupon',{layout : 'adminLayout', admin})
     },
 
     /* GET Generate Coupon Code Page. */
@@ -263,7 +264,7 @@ module.exports = {
         let data = {
             couponCode : req.body.coupon,
             validity : req.body.validity,
-            minAmount : req.body.minAmount,
+            minPurchase : req.body.minPurchase,
             minDiscountPercentage : req.body.minDiscountPercentage,
             maxDiscountValue : req.body.maxDiscount,
             description : req.body.description
@@ -276,8 +277,18 @@ module.exports = {
     /* GET Coupon List Page. */
     getCouponList:(req,res)=>{
         let admin = req.session.admin
+        console.log('called coupon list page')
         couponHelpers.getCouponList().then((couponList)=>{
             res.render('admin/couponList',{layout : 'adminLayout', admin, couponList})
+        })
+    },
+
+    
+    /* DELETE Coupon  Page. */
+    removeCoupon:(req,res)=>{
+        let couponId = req.body.couponId
+        couponHelpers.removeCoupon(couponId).then((successResponse)=>{
+            res.send(successResponse)
         })
     }
     // errorPage:(req,res)=>{

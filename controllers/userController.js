@@ -2,9 +2,11 @@ const express = require('express')
 const session = require('express-session')
 const userHelper = require('../helpers/userHelper')
 const cartHelpers = require('../helpers/cartHelpers')
+const orderHelpers = require('../helpers/orderHelpers')
 const wishListHelpers = require('../helpers/wishlistHelpers')
 const userModel = require('../schema/models')
 const { sendOtpApi, otpVerify } = require('../api/twilio')
+const couponHelpers = require('../helpers/couponHelpers')
 
 
 module.exports = {
@@ -110,7 +112,7 @@ module.exports = {
             res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount })
         })
     },
-
+      
     /* GET Product Detail Page. */
     getProductDetail: async (req, res) => {
         let proId = req.params.id
@@ -164,6 +166,23 @@ module.exports = {
         let data = req.body
         userHelper.changeUserData(userId,data).then((updatedUserData)=>{
             res.send(updatedUserData)
+        })
+    },
+
+    verifyCoupon: (req,res)=>{
+        let couponCode = req.params.id
+        let userId = req.session.user._id
+        couponHelpers.verifyCoupon(userId,couponCode).then((response)=>{
+            res.send(response)
+        })
+    },
+
+    applyCoupon: async(req,res)=>{
+        let couponCode = req.params.id
+        let userId = req.session.user._id
+        let total = await orderHelpers.totalCheckOutAmount(userId)
+        couponHelpers.applyCoupon(couponCode,total).then((response)=>{
+            res.send(response)
         })
     }
 }

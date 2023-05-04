@@ -172,23 +172,30 @@ module.exports = {
     postAddCategory: (data) => {
         try {
             return new Promise((resolve, reject) => {
-                categoryModel.Category.findOne({ category: data.category }).then(async (category) => {
-
-                    if (!category) {
-
-                        let category = categoryModel.Category(data)
-                        await category.save().then(() => {
+                // capitalize the first letter of category and subcategory
+                const category = data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase()
+                const subCategory = data.sub_category.charAt(0).toUpperCase() + data.sub_category.slice(1).toLowerCase()
+    
+                categoryModel.Category.findOne({ category: category }).then(async (categoryDoc) => {
+                    if (!categoryDoc) {
+                        let newCategory = new categoryModel.Category({ category: category, sub_category: [subCategory] })
+                        await newCategory.save().then(() => {
                             resolve({ status: true })
                         })
                     } else {
-
-                        if (!category.sub_category.includes(data.sub_category)) {
-                            categoryModel.Category.updateOne({ category: data.category },
-                                { $push: { sub_category: data.sub_category } }).then(() => {
-                                    resolve({ status: true })
-                                })
+                        if (!categoryDoc.sub_category.includes(subCategory)) {
+                            categoryModel.Category.findOne({ category: category, sub_category: subCategory }).then(async (subcategoryDoc) => {
+                                if (!subcategoryDoc) {
+                                    categoryDoc.sub_category.push(subCategory)
+                                    await categoryDoc.save().then(() => {
+                                        resolve({ status: true })
+                                    })
+                                } else {
+                                    resolve({ status: false, message: 'Subcategory already exists.' })
+                                }
+                            })
                         } else {
-                            resolve({ status: false })
+                            resolve({ status: false, message: 'Category and subcategory already exist.' })
                         }
                     }
                 })
@@ -197,6 +204,8 @@ module.exports = {
             console.log(error.message);
         }
     },
+    
+    
 
     /* GET editCategory Page. */
     getEditCategory: (catId) => {

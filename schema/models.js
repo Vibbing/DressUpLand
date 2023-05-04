@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String
     },
+    coupons : {
+        type : Array
+    },
     wallet: {
         type: Number,
         default: 0
@@ -120,6 +123,7 @@ const orderSchema = new mongoose.Schema({
             fname: { type: String },
             lname: { type: String },
             phone: { type: Number },
+            paymentId: { type : String},
             paymentMethod: { type: String },
             paymentStatus: { type: String },
             totalPrice: { type: Number },

@@ -3,7 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/userController')
 const cartController = require('../controllers/cartController')
 const orderController = require('../controllers/orderControllers')
-const auth = require('../middleware/auth')
+const auth = require('../middleware/auth');
+const adminController = require('../controllers/adminController');
 
 /* GET Home Page. */
 router.get('/',userController.getHomePage)
@@ -76,6 +77,10 @@ router.route('/add-to-wishlist').post(userController.addWishList)
 router.route('/remove-product-wishlist').delete(userController.removeProductWishlist)
 
 router.route('/change-user-data/:id').post(userController.changeUserData)
+
+router.route('/coupon-verify/:id').get(auth.userAuth,userController.verifyCoupon)
+
+router.route('/apply-coupon/:id').get(auth.userAuth, userController.applyCoupon)
 
 
 module.exports = router;

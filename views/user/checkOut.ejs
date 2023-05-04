@@ -9,6 +9,29 @@
 <main class="main">
   <section class="mt-50 mb-50">
     <div class="container">
+
+      <!-- coupon dropdown div start -->
+      <div class="col-lg-4 ">
+        <div class="toggle_info mb-30">
+          <span><i class="fi-rs-label mr-10"></i><span class="text-muted">Have a coupon?</span> <a href="#coupon" data-bs-toggle="collapse" class="collapsed" aria-expanded="false">Click here to enter your code</a></span>
+        </div>
+        <div class="panel-collapse collapse coupon_form " id="coupon">
+          <div class="panel-body mb-20">
+            <p class="mb-30 font-sm">If you have a coupon code, please apply it below.</p>
+            <div>
+              <div>
+                <input type="text" name="coupon" id="couponCode" placeholder="Enter Coupon Code...">
+              </div>
+              <div>
+                <button class="btn  btn-md" name="login" onclick="applyCoupon('<%=total%>')">Apply Coupon</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span id="couponErr"></span>
+      </div>
+      <!-- coupon dropdown div end -->
+
       <div class="row">
         <div class="col-md-6">
           <div class="mb-25">
@@ -18,39 +41,43 @@
             <input name="user" value="<%=user._id%>" type="hidden">
             <input name="total" value="<%=total%>" type="hidden">
             <input id="cartId" name="cartID" type="hidden" value="<%=cartItems[0]._id%>">
-            <% address?.Address.forEach(function(item,index) { %>
-            <div id="" class="card my-3 col-md-8">
-              <div class="card-header d-flex">
-                <div class="form-check">
-                  <input class="form-check-input" checked value="<%=item._id%>" type="radio" name="address" id="flexRadioDefault1" checked readonly />
-                  <label class="form-check-label" for="flexRadioDefault1">
-                    <h5 class="mb-0">Billing Address</h5>
-                  </label>
+            <div id="address-container" style="max-height: 400px; overflow-y: scroll; margin-right: 250px; ">
+              <div class="card-deck">
+                <% address?.Address.forEach(function(item,index) { %>
+                <div id="" class="card my-3 col-md-8 ">
+                  <div class="card-header d-flex">
+                    <div class="form-check">
+                      <input class="form-check-input" checked value="<%=item._id%>" type="radio" name="address" id="flexRadioDefault1" checked readonly />
+                      <label class="form-check-label" for="flexRadioDefault1">
+                        <h5 class="mb-0">Billing Address</h5>
+                      </label>
+                    </div>
+
+                  </div>
+                  <div class="card-body">
+                    <strong><%=item.fname%> <%=item.lname%></strong>
+                    <address>
+                      <%=item.street%> ,
+                      <%=item.appartment%> <br>
+                      <%=item.city%> ,
+                      <%=item.zipcode%> ,
+                      <%=item.state%> <br>
+                      <%=item.phone%> ,
+                      <%=item.email%>
+
+
+                    </address>
+                    <div class="d-flex mt-2">
+                      <button type="button" class="btn btn-primary btn-small" onclick="editAddress('<%=item._id%>')" data-toggle="modal" data-target="#editModal" data-whatever="@mdo" <a href="" rel="modal:open" class="btn hover-up btn-small mx-1"><i class="fi-rs-edit"></i></a> ></button>
+
+                      <a style="border-color: red ;" onclick="removeAddress('<%=item._id%>')" class="mx-1 btn btn-danger hover-up bg-danger btn-small"><i class="fi-rs-trash"></i></a>
+                    </div>
+
+                  </div>
                 </div>
-
-              </div>
-              <div class="card-body">
-                <strong><%=item.fname%> <%=item.lname%></strong>
-                <address>
-                  <%=item.street%> ,
-                  <%=item.appartment%> <br>
-                  <%=item.city%> ,
-                  <%=item.zipcode%> ,
-                  <%=item.state%> <br>
-                  <%=item.phone%> ,
-                  <%=item.email%>
-
-
-                </address>
-                <div class="d-flex mt-2">
-                  <button type="button" class="btn btn-primary btn-small" onclick="editAddress('<%=item._id%>')" data-toggle="modal" data-target="#editModal" data-whatever="@mdo" <a href="" rel="modal:open" class="btn hover-up btn-small mx-1"><i class="fi-rs-edit"></i></a> ></button>
-
-                  <a style="border-color: red ;" onclick="removeAddress('<%=item._id%>')" class="mx-1 btn btn-danger hover-up bg-danger btn-small"><i class="fi-rs-trash"></i></a>
-                </div>
-
+                <% }); %>
               </div>
             </div>
-            <% }); %>
 
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Add New Address</button>
 
@@ -100,15 +127,19 @@
                   <% }); %>
                   <tr>
                     <th>SubTotal</th>
-                    <td class="product-subtotal" colspan="2">₹<span><%=total%></span></td>
+                    <td class="product-subtotal" id="subTotal" colspan="2">₹<span><%=total%></span></td>
                   </tr>
                   <tr>
                     <th>Shipping</th>
                     <td colspan="2"><em>Free Shipping</em></td>
                   </tr>
                   <tr>
+                    <th>Your Special Offer</th>
+                    <td colspan="2"><em id="couponOffer"></em></td>
+                  </tr>
+                  <tr>
                     <th>Total</th>
-                    <td colspan="2" class="product-subtotal">₹<span class="font-xl text-brand fw-900"><%=total%></span></td>
+                    <td colspan="2" class="product-subtotal" id="total">₹<span class="font-xl text-brand fw-900"><%=total%></span></td>
                   </tr>
 
                 </tbody>
@@ -147,7 +178,12 @@
                   <div class="form-group collapse in" id="paypal">
                   </div>
                 </div>
-
+                <div class="form-group">
+                 
+                  <input   name="discountedAmount" id="total1"  value="<%=total%>" type="hidden" >
+                  <input   type="hidden" name="couponCode" id="codes" value="0">
+            
+              </div>
               </div>
             </div>
             <button type="button" class="btn btn-fill-out btn-block mt-30" onclick="proceedToPayment()">Proceed to payment</button>
@@ -186,24 +222,7 @@
                             </div>
                         </div>
                     </div> -->
-        <div class="col-lg-6">
-          <div class="toggle_info">
-            <span><i class="fi-rs-label mr-10"></i><span class="text-muted">Have a coupon?</span> <a href="#coupon" data-bs-toggle="collapse" class="collapsed" aria-expanded="false">Click here to enter your code</a></span>
-          </div>
-          <div class="panel-collapse collapse coupon_form " id="coupon">
-            <div class="panel-body">
-              <p class="mb-30 font-sm">If you have a coupon code, please apply it below.</p>
-              <form method="post">
-                <div class="form-group">
-                  <input type="text" placeholder="Enter Coupon Code...">
-                </div>
-                <div class="form-group">
-                  <button class="btn  btn-md" name="login">Apply Coupon</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   </section>
@@ -545,7 +564,6 @@
       "image": "https://example.com/your_logo",
       "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
       "handler": function(response) {
-
         verifypayment(response, order)
       },
 
@@ -565,13 +583,14 @@
     rzp1.open();
   }
 
-  function verifypayment(payment, order) {
+  function verifypayment(payment, order, paymentId) {
 
     $.ajax({
       url: 'verify_payment',
       data: {
         payment,
-        order
+        order,
+        paymentId
       },
       method: 'post',
       success: (response) => {
@@ -586,6 +605,48 @@
           })
         } else {
 
+        }
+
+      }
+    })
+  }
+
+
+  function applyCoupon(total) {
+    let couponCode = document.getElementById('couponCode').value
+    $.ajax({
+      url: '/coupon-verify/' + couponCode,
+      method: 'GET',
+      success: (response) => {
+        if (response.status == true) {
+
+          $.ajax({
+            url: '/apply-coupon/' + couponCode,
+            method: 'GET',
+            success: (response) => {
+              console.log(response,'---');
+              if (response.status == true) {
+                document.getElementById('couponErr').style.color = '#19ff11'
+                document.getElementById('couponErr').innerText = "Coupon Applied SuccessFully"
+                document.getElementById('subTotal').innerText = total - response.discountAmount
+                document.getElementById('total').innerText = total - response.discountAmount
+                document.getElementById('total1').value = total - response.discountAmount
+                document.getElementById('couponOffer').innerText = response.discount + '%'
+                document.getElementById('codes').value = response.couponCode
+              } else {
+                document.getElementById('couponErr').style.color = "#ff0707"
+                document.getElementById('couponErr').innerText = response.message
+              }
+
+            }
+          })
+        } else {
+          document.getElementById('couponErr').style.color = "#ff0707"
+          document.getElementById('couponErr').innerText = response.message
+
+          setTimeout(function() {
+            location.reload()
+          }, 5000)
         }
 
       }

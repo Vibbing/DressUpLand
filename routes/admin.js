@@ -80,6 +80,9 @@ router.route('/generate-coupon-code').get(auth.adminAuth,adminController.generat
 /* GET Coupon List Page. */
 router.route('/coupon-list').get(auth.adminAuth,adminController.getCouponList)
 
+/* DELETE Coupon  Page. */
+router.route('/remove-coupon').delete(adminController.removeCoupon)
+
 
 /* GET error Page. */
 // router.get('/error',adminController.errorPage)
