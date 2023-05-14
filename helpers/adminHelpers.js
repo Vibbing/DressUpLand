@@ -2,8 +2,11 @@ const adminModel = require('../schema/models')
 const productModel = require('../schema/models')
 const categoryModel = require('../schema/models')
 const userModel = require('../schema/models')
+const orderModel = require('../schema/models')
+const bannerModel = require('../schema/models')
 const bcrypt = require('bcrypt')
 const { response } = require('../app')
+const { text } = require('pdfkit')
 
 module.exports = {
 
@@ -64,6 +67,7 @@ module.exports = {
 
     /* Post AddProduct Page. */
     postAddProduct: (data) => {
+        console.log(data,'dataaaaa');
         try {
             return new Promise((resolve, reject) => {
                 let product = new productModel.Product(data);
@@ -71,6 +75,23 @@ module.exports = {
                     resolve()
                 })
 
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    /* GET Sub Category list for Add Product Page. */
+    getSubCategory:(data)=>{
+        try {
+            return new Promise((resolve,reject)=>{
+                categoryModel.Category.findOne({category : data.category}).then((category)=>{
+                    if(category){
+                        resolve(category.sub_category)
+                    }else{
+                        reject("Error Category not found")
+                    }
+                })
             })
         } catch (error) {
             console.log(error.message);
@@ -170,42 +191,43 @@ module.exports = {
 
     /* Post addCategory Page. */
     postAddCategory: (data) => {
+        console.log(data, 'dataa');
         try {
             return new Promise((resolve, reject) => {
-                // capitalize the first letter of category and subcategory
-                const category = data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase()
-                const subCategory = data.sub_category.charAt(0).toUpperCase() + data.sub_category.slice(1).toLowerCase()
-    
-                categoryModel.Category.findOne({ category: category }).then(async (categoryDoc) => {
-                    if (!categoryDoc) {
-                        let newCategory = new categoryModel.Category({ category: category, sub_category: [subCategory] })
-                        await newCategory.save().then(() => {
-                            resolve({ status: true })
-                        })
-                    } else {
-                        if (!categoryDoc.sub_category.includes(subCategory)) {
-                            categoryModel.Category.findOne({ category: category, sub_category: subCategory }).then(async (subcategoryDoc) => {
-                                if (!subcategoryDoc) {
-                                    categoryDoc.sub_category.push(subCategory)
-                                    await categoryDoc.save().then(() => {
-                                        resolve({ status: true })
-                                    })
-                                } else {
-                                    resolve({ status: false, message: 'Subcategory already exists.' })
-                                }
-                            })
+                // capitalize the first letter of category
+                const category = data.category.charAt(0).toUpperCase() + data.category.slice(1).toLowerCase();
+
+                categoryModel.Category.findOne({ category: category })
+                    .then(async (categoryDoc) => {
+                        if (!categoryDoc) {
+                            let newCategory = new categoryModel.Category({
+                                category: category,
+                                sub_category: [{ name: data.sub_category, offer: { validFrom: 0, validTo: 0, discountPercentage: 0 } }]
+                            });
+                            await newCategory.save().then(() => {
+                                resolve({ status: true });
+                            });
                         } else {
-                            resolve({ status: false, message: 'Category and subcategory already exist.' })
+                            let subcategoryDoc = categoryDoc.sub_category.find((sub_category) => sub_category.name === data.sub_category);
+                            if (!subcategoryDoc) {
+                                categoryDoc.sub_category.push({ name: data.sub_category, offer: { validFrom: 0, validTo: 0, discountPercentage: 0 } });
+                                await categoryDoc.save().then(() => {
+                                    resolve({ status: true });
+                                });
+                            } else {
+                                resolve({ status: false, message: 'Subcategory already exists.' });
+                            }
                         }
-                    }
-                })
-            })
+                    });
+            });
         } catch (error) {
             console.log(error.message);
         }
     },
-    
-    
+
+
+
+
 
     /* GET editCategory Page. */
     getEditCategory: (catId) => {
@@ -250,16 +272,187 @@ module.exports = {
             console.log(err.message);
         }
     },
-    deleteSubCategory: (id, data) => {
+
+    
+    deleteSubCategory: (id, name) => {
         return new Promise(async (resolve, reject) => {
           await categoryModel.Category.updateOne(
             { _id: id },
-            { $pull: { sub_category: { $in: [data] } } }
+            { $pull: { sub_category: { name: name } } }
           ).then((response) => {
             console.log(response);
             resolve(response);
-          })
+          });
         });
-      }
+      },
       
+
+    getSalesReport: () => {
+        try {
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
+                    {
+                        $unwind: '$orders'
+                    },
+                    {
+                        $match: {
+                            "orders.orderConfirm": "delivered"
+                        }
+                    }
+                ]).then((response) => {
+                    resolve(response)
+                })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    postReport: (date) => {
+        console.log(date, 'date+++++');
+        try {
+            let start = new Date(date.startdate);
+            let end = new Date(date.enddate);
+            return new Promise((resolve, reject) => {
+                orderModel.Order.aggregate([
+                    {
+                        $unwind: '$orders'
+                    },
+                    {
+                        $match: {
+                            $and: [
+                                { "orders.orderConfirm": "delivered" },
+                                { "orders.createdAt": { $gte: start, $lte: end } }
+                            ]
+                        }
+                    }
+                ]).exec()
+                    .then((response) => {
+                        console.log(response, 'response---');
+                        resolve(response)
+                    })
+            })
+        } catch (error) {
+            console.log(error.message);
+        }
+    },
+
+    
+  addBanner: (texts, Image) => {
+
+    return new Promise(async (resolve, reject) => {
+
+      let banner = bannerModel.Banner({
+        title: texts.title,
+        description: texts.description,
+        image: Image
+
+      })
+      await banner.save().then((response) => {
+        resolve(response)
+      })
+    })
+  },
+
+  //dashboard codes
+  
+  getAllProducts: () => {
+    return new Promise(async (resolve, reject) => {
+      await productModel.Product.find().then((response) => {
+        resolve(response);
+      });
+    });
+  },
+
+  getCodCount: () => {
+    return new Promise(async (resolve, reject) => {
+      let response = await orderModel.Order.aggregate([
+        {
+          $unwind: "$orders",
+        },
+        {
+          $match: {
+            "orders.paymentMethod": "COD",
+          },
+        },
+      ]);
+      resolve(response);
+    });
+  },
+
+  getOnlineCount: () => {
+    return new Promise(async (resolve, reject) => {
+      let response = await orderModel.Order.aggregate([
+        {
+          $unwind: "$orders",
+        },
+        {
+          $match: {
+            "orders.paymentMethod": "razorpay",
+          },
+        },
+      ]);
+      resolve(response);
+    });
+  },
+
+  getWalletCount:()=>
+  {
+    return new Promise(async (resolve, reject) => {
+      let response = await orderModel.Order.aggregate([
+        {
+          $unwind: "$orders",
+        },
+        {
+          $match: {
+            "orders.paymentMethod": "wallet",
+          },
+        },
+      ]);
+      resolve(response);
+    });
+
+  },
+
+  getBannerList:()=>{
+   return new Promise((resolve,reject)=>{
+    bannerModel.Banner.find().then((banner)=>{
+        resolve(banner)
+    })
+   })
+  },
+
+  getEditBanner:(bannerId)=>{
+    return new Promise((resolve,reject)=>{
+        bannerModel.Banner.findOne({_id : bannerId}).then((bannerFound)=>{
+        resolve(bannerFound)
+        })
+    })
+  },
+
+  postEditBanner:(bannerId,text,image)=>{
+    return new Promise((resolve,reject)=>{
+        bannerModel.Banner.updateOne(
+            {_id : bannerId},
+            {
+                $set:{
+                    title : text.title,
+                    description :text.description,
+                    image : image
+                }
+            }).then((bannerUpdated)=>{
+                resolve(bannerUpdated)
+            })
+    })
+  },
+
+  deleteBanner:(bannerId)=>{
+    return new Promise((resolve,reject)=>{
+        bannerModel.Banner.deleteOne({_id : bannerId}).then(()=>{
+            resolve()
+        })
+    })
+  }
+
+
 }

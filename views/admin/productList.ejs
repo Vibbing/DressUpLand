@@ -2,7 +2,7 @@
 <section class="content-main">
   <div class="content-header">
     <div>
-      <h2 class="content-title card-title">Products List</h2>
+      <h2 class="content-title card-title">Products</h2>
     </div>
     <div>
       <a href="/admin/addProduct" class="btn btn-primary btn-sm rounded">Create new</a>
@@ -82,7 +82,7 @@
   function deleteProduct(proId){
     swal({
         title: "Are you sure?",
-        text: "Once deleted, you will not be able to recover this category!",
+        text: "Once deleted, you will not be able to recover this Product!",
         icon: "warning",
         buttons: true,
         dangerMode: true,
@@ -96,14 +96,16 @@
               if(response.status){
                 swal("Category has been deleted!", {
                   icon: "success",
-                });
+                }).then(()=>{
+                  location.reload()
+                })
               }else{
-                swal("Oops!", "Something went wrong. Category not deleted!", "error");
+                swal("Oops!", "Something went wrong. Product not deleted!", "error");
               }
             }
           })
         }else{
-          swal("Category is safe!");
+          swal("Product is safe!");
         }
       })
 

@@ -20,7 +20,7 @@ module.exports = {
             var count = await cartHelpers.getCartCount(user._id)
             var wishlistCount = await wishListHelpers.getWishListCount(user._id)
         }
-        res.render('homePage', { layout: 'Layout', user, count, wishlistCount})
+        res.render('homePage', { layout: 'Layout', user, count, wishlistCount })
     },
 
     /* GET SignUp Page. */
@@ -69,25 +69,30 @@ module.exports = {
         const { mobileNumber } = req.body;
         req.session.number = mobileNumber;
         try {
+            const user = await userHelper.getUserNumber(mobileNumber);
+            if (user.status !== true) {
+                return res.status(200).json({ error: true, message: 'Wrong Mobile Number' });
+            }
             const status = await sendOtpApi(mobileNumber);
             if (!status) {
-
-                res.status(200).json({ error: true, message: 'Something went wrong' })
+                return res.status(200).json({ error: true, message: 'Something went wrong' });
             }
-            res.status(200).json({ error: false, message: 'Otp has been send successfully' })
-
+            res.status(200).json({ error: false, message: 'Otp has been send successfully' });
         } catch (error) {
-            res.status(500).json({ message: 'Internal server error occured' })
+            res.status(500).json({ message: 'Internal server error occured' });
         }
     },
 
+
     /* GET Otp verify Page. */
     otpVerify: async (req, res) => {
-        
+
         const { otp } = req.body;
-   
+        
+
         let number = req.session.number
-        const user = await userModel.User.findOne({mobile : number }).lean().exec()
+        console.log(otp,req.body,number,'--');
+        const user = await userModel.User.findOne({ mobile: number }).lean().exec()
         req.session.user = user;
         console.log(user);
         try {
@@ -96,23 +101,58 @@ module.exports = {
             if (!status) {
                 res.status(200).json({ error: false, message: 'Something went wrong' })
             }
-            res.status(200).json({ error: false, message: 'Otp has been verified'})
+            res.status(200).json({ error: false, message: 'Otp has been verified' })
 
         } catch (error) {
             res.status(500).json({ message: 'Internal server error occured' })
         }
     },
 
+    /* Post Resend Otp Page. */
+    resendOtp: async (req, res) => {
+        let mobileNumber = req.session.number
+
+        try {
+            const status = await sendOtpApi(mobileNumber);
+            if (!status) {
+                return res.status(200).json({ error: true, message: 'Something went wrong' });
+            }
+            res.status(200).json({ error: false, message: 'Otp has been send successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Internal server error occured' });
+        }
+
+    },
+
     /* GET Shop Page. */
     getShop: async (req, res) => {
         let user = req.session.user
+        console.log(req.query.sort);
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
-        userHelper.getShop().then((product) => {
-            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount })
-        })
+        console.log(req.query);
+        if (req.query?.search || req.query?.sort || req.query?.filter) {
+            console.log('1');
+            const { product, currentPage, totalPages, noProductFound } = await userHelper.getQueriesOnShop(req.query)
+            noProductFound ?
+                req.session.noProductFound = noProductFound
+                : req.session.selectedProducts = product
+            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, productResult: req.session.noProductFound })
+        } else {
+            console.log('fetching all products')
+            product = await userHelper.getShop()
+            if (product.length != 0)
+                req.session.noProductFound = false
+            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, productResult: req.session.noProduct })
+            req.session.noProductFound = false
+
+        }
     },
-      
+
+
+
+
+
     /* GET Product Detail Page. */
     getProductDetail: async (req, res) => {
         let proId = req.params.id
@@ -120,68 +160,69 @@ module.exports = {
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         userHelper.getProductDetail(proId).then((product) => {
+            console.log(product,'=+==');
             res.render('user/productDetail', { product, user, count, wishlistCount })
         })
     },
 
-    getDetails:(userId)=>{
+    getDetails: (userId) => {
         try {
-            return new Promise((resolve,reject)=>{
-            userModel.User.findOne({_id : userId}).then((user)=>{
-                resolve(user)
-            })
+            return new Promise((resolve, reject) => {
+                userModel.User.findOne({ _id: userId }).then((user) => {
+                    resolve(user)
+                })
             })
         } catch (error) {
             console.log(error.message);
         }
     },
 
-    getWishList: async (req,res)=>{
+    getWishList: async (req, res) => {
         let user = req.session.user
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
-        wishListHelpers.getWishListProducts(user._id).then((wishlistProducts)=>{
-            res.render('user/wishList',{user,count,wishlistProducts,wishlistCount})
+        wishListHelpers.getWishListProducts(user._id).then((wishlistProducts) => {
+            res.render('user/wishList', { user, count, wishlistProducts, wishlistCount })
         })
     },
 
-    addWishList:(req,res)=>{
+    addWishList: (req, res) => {
         let proId = req.body.proId
         let userId = req.session.user._id
-        wishListHelpers.addWishList(userId,proId).then((response)=>{
+        wishListHelpers.addWishList(userId, proId).then((response) => {
             res.send(response)
         })
     },
 
-    removeProductWishlist:(req,res)=>{
+    removeProductWishlist: (req, res) => {
         let proId = req.body.proId
         let wishListId = req.body.wishListId
-        wishListHelpers.removeProductWishlist(proId,wishListId).then((response)=>{
+        wishListHelpers.removeProductWishlist(proId, wishListId).then((response) => {
             res.send(response)
         })
     },
 
-    changeUserData:(req,res)=>{
+    changeUserData: (req, res) => {
         let userId = req.params.id
         let data = req.body
-        userHelper.changeUserData(userId,data).then((updatedUserData)=>{
+        userHelper.changeUserData(userId, data).then((updatedUserData) => {
             res.send(updatedUserData)
         })
     },
 
-    verifyCoupon: (req,res)=>{
+    verifyCoupon: (req, res) => {
         let couponCode = req.params.id
         let userId = req.session.user._id
-        couponHelpers.verifyCoupon(userId,couponCode).then((response)=>{
+        couponHelpers.verifyCoupon(userId, couponCode).then((response) => {
             res.send(response)
         })
     },
 
-    applyCoupon: async(req,res)=>{
+    applyCoupon: async (req, res) => {
         let couponCode = req.params.id
         let userId = req.session.user._id
         let total = await orderHelpers.totalCheckOutAmount(userId)
-        couponHelpers.applyCoupon(couponCode,total).then((response)=>{
+        couponHelpers.applyCoupon(couponCode, total).then((response) => {
             res.send(response)
         })
     }

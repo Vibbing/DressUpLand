@@ -60,13 +60,13 @@
       success(response) {
         if (response.status) {
           location.href = '/'
-        } else if(response.blocked){
+        } else if (response.blocked) {
           document.getElementById('error').innerText = "You are blocked by admin"
         } else {
           document.getElementById('error').innerText = "Email or Password is incorrect"
 
         }
-      
+
       }
     })
   }
@@ -83,13 +83,14 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div id="otp-login-modal" class="modal-body">
-        <form >
+        <form>
           <div class="mb-3">
             <label for="Mobile Number" class="form-label">Mobile Number</label>
             <input type="number" class="form-control" name="mobileNumber" id="mobileNumber" required>
+            <small id="err" class="text-danger"></small>
           </div>
           <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary" id="send-otp" >Send OTP</button>
+            <button type="submit" class="btn btn-primary" id="send-otp">Send OTP</button>
           </div>
         </form>
       </div>
@@ -99,106 +100,159 @@
 
 
 <script>
-  
   $('#get-otpLogin').click(function() {
-    
+
     $('#otp-login').modal('show');
-    
-  
+
+
   });
 
   // Hide modal on close button or background click
   $('.close, .modal').click(function() {
-    
+
     $('.modal').hide();
   });
   $(document).ready(function() {
+  // Prevent modal from closing on modal content click
+  $('.modal-content').click(function(e) {
+    e.stopPropagation();
+  });
 
+  $('#otp-login').on('shown.bs.modal', function() {
+    $('#send-otp').click(function(e) {
+      e.preventDefault()
+      const mobileNumber = $('#mobileNumber').val().trim();
+      const error = document.getElementById('err');
+      error.textContent = '';
 
-    // Prevent modal from closing on modal content click
-    $('.modal-content').click(function(e) {
-      e.stopPropagation();
-    });
-
-
-    $('#otp-login').on('shown.bs.modal', function() {
-      $('#send-otp').click(function(e) {
-        e.preventDefault()
-        const mobileNumber = $('#mobileNumber').val().trim();
-        const error = $('#err');
-        error.text('');
-
-        if (mobileNumber === '') {
-          error.text('Field is required');
-        } else {
-          $.ajax({
-            url: '/otp-login',
-            method: 'post',
-            data: {
-              mobileNumber: mobileNumber
-            },
-            success(response) {
-              if (!response.error) {
-
-                setTimeout(appendVerifyForm(), 5000)
-                
-              } else {
-                swal({
-                  title: "Already Exist",
-                  icon: "error",
-                  button: "OK",
-                });
-              }
+      if (mobileNumber === '') {
+        error.textContent = 'Mobile number is required';
+      } else {
+        $.ajax({
+          url: '/otp-login',
+          method: 'post',
+          data: {
+            mobileNumber: mobileNumber
+          },
+          success(response) {
+            console.log(response, '-----');
+            if (!response.error) {
+              setTimeout(appendVerifyForm(), 5000);
+            } else {
+              swal({
+                title: response.message,
+                icon: "error",
+                button: "OK",
+                timer: 5000
+              }).then(() => {
+                location.reload();
+              })
             }
-          });
-        }
-      });
+          }
+        });
+      }
     });
+  });
+
+  $('#otp-login form').submit(function(e) {
+    e.preventDefault();
+    $('#send-otp').click();
+  });
+});
 
 
-  })
 
- 
   
-  function verifyOtp(){
-    
+
+
+
+  function verifyOtp() {
+
     const otp = $('#otp').val();
     $.ajax({
-        url:'/otp-verify',
-        type: 'post',
-        data: {
-          otp : otp
-        }
-      }).done(res =>{
-        location.href = '/'
-      }).fail(err =>{
+      url: '/otp-verify',
+      type: 'post',
+      data: {
+        otp: otp
+      }
+    }).done(res => {
+      location.href = '/'
+    }).fail(err => {
 
-      })
+    })
 
 
   }
 
-  function appendVerifyForm(){
+  function appendVerifyForm() {
+  $('#otp-login-modal').remove()
+  $('#verify-header').remove()
 
-    $('#otp-login-modal').remove()
-    $('#verify-header').remove()
+  $(` <div class="modal-header">
+      <h5 class="modal-title" id="exampleModalLabel">Verify OTP </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <form id="otp-verify">
+        <div class="mb-3">
+          <label for="Mobile Number" class="form-label">Verify Code</label>
+          <input id="otp" type="number" class="form-control" name="otp" id="otp" required>
+        </div>
+        <div class="d-grid gap-2">
+          <button type="button" onclick="verifyOtp()" class="btn btn-primary" id="send-otp" >Send OTP</button>
+        </div>
+      </form>
+    </div>`).appendTo('#content-modal')
 
-    $(` <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Verify OTP </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="otp-verify">
-          <div class="mb-3">
-            <label for="Mobile Number" class="form-label">Verify Code</label>
-            <input id="otp" type="number" class="form-control" name="otp" id="otp" required>
-          </div>
-          <div class="d-grid gap-2">
-            <button type="button" onclick="verifyOtp()" class="btn btn-primary" id="send-otp" >Send OTP</button>
-          </div>
-        </form>
-      </div>`).appendTo('#content-modal')
-  }
+  let timer = 30; // Set the timer in seconds
+  let countDown; // Declare the countdown variable
+  const timerEl = $('<small class="text-danger">Time remaining: 30 seconds</small>').appendTo('#content-modal');
+
+  // Countdown function
+  const startCountDown = () => {
+    countDown = setInterval(() => {
+      timer--;
+      timerEl.text(`Time remaining: ${timer} seconds`);
+      if (timer === 0) {
+        clearInterval(countDown);
+        timerEl.text('Time up! Please try again.');
+        $('#send-otp').attr('disabled', 'disabled');
+        $('#resend-otp').removeAttr('disabled');
+      }
+    }, 1000);
+  };
+  
+  startCountDown(); // Start the countdown initially
+
+  // Resend OTP button
+  $('<button type="button" class="btn btn-link btn-sm" id="resend-otp" disabled>Resend OTP</button>')
+    .appendTo('#content-modal')
+    .click(() => {
+      $('#resend-otp').attr('disabled', 'disabled');
+      $('#send-otp').removeAttr('disabled');
+      clearInterval(countDown);
+      timer = 30;
+      timerEl.text(`Time remaining: ${timer} seconds`);
+      startCountDown(); // Start the countdown again
+      // TODO: add code to resend the OTP using Twilio
+      $.ajax({
+      url: '/resend-otp',
+      method: 'post',
+      
+      success(response) {
+        console.log(response);
+        
+      },
+      error(jqXHR, textStatus, errorThrown) {
+        console.error(textStatus, errorThrown);
+        // Handle the error
+      }
+    });
+});
+
+}
+
+
 </script>
 
 <style>

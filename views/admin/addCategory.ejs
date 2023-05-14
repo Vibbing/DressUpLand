@@ -44,12 +44,12 @@
               <td><%=  item._id%> </td>
               <td><%=  item.category%></td>
               <td><button class="btn btn-secondary btn-sm " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  
+
                 </button>
 
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <% item.sub_category.forEach(function(item) { %>
-                  <a class="dropdown-item" href="#"><%=  item%></a>
+                  <a class="dropdown-item" href="#"><%=item.name%></a>
                   <% }) %>
                 </div>
 
@@ -197,6 +197,7 @@
                   <div class="mb-4">
                     <label for="product_name" class="form-label">Category</label>
                     <input id="editCategory" disabled="" type="text" placeholder="Type here" name="category" class="form-control rounded" />
+                    <label for="product_name" class="form-label">Sub Category</label>
                     <select id="subCatSelect" class="form-select">
 
                       <option value=""></option>
@@ -205,12 +206,26 @@
 
                     <div class="mt-2">
                       <input id="newSubCatInput" type="text" placeholder="New subcategory" name="newSubCat" class="form-control rounded" />
-                      <button id="addSubCatBtn" type="submit" class="btn btn-primary rounded">Add</button>
-                      <button id="removeSubCatBtn" type="button" class="btn btn-danger rounded">Remove</button>
                     </div>
                     <input style="display: none;" id="editCategoryId" type="text" placeholder="Type here" name="_id" class="form-control rounded" />
                     <p id="err" class="text-danger"></p>
                   </div>
+
+                  <div class="mb-3">
+                    <label for="offer_percentage" class="form-label">Offer Percentage</label>
+                    <input type="number" min="0" max="100" class="form-control" id="offer_percentage" name="offer_percentage">
+                  </div>
+                  <div class="mb-3">
+                    <label for="valid_from" class="form-label">Valid From</label>
+                    <input type="date" class="form-control" id="valid_from" name="valid_from">
+                  </div>
+                  <div class="mb-3">
+                    <label for="valid_to" class="form-label">Valid To</label>
+                    <input type="date" class="form-control" id="valid_to" name="valid_to">
+                  </div>
+                  <button id="addSubCatBtn" type="submit" class="btn btn-primary rounded">Add</button>
+                  <button id="removeSubCatBtn" type="button" class="btn btn-danger rounded">Remove</button>
+
 
                   <!-- <div class="d-grid">
                     <button type="submit" class="btn btn-primary rounded">Update category</button>
@@ -252,13 +267,27 @@
         type: 'patch',
         data: $('#edit-category-form').serialize()
       }).done(res => {
-        console.log('success');
+        swal({
+          icon: 'success',
+          title: 'Sub-category added successfully',
+          showConfirmButton: false,
+          timer: 3000
+        });
+
         location.reload();
       }).fail(err => {
-
+        // Show sweetAlert with error message
+        swal({
+          title: "Error!",
+          text: err.responseJSON.error,
+          icon: "error",
+          timer: 3000
+        });
+        location.reload();
       })
     })
   });
+
 
   //get edit subcategory
 
@@ -267,18 +296,20 @@
       url: '/admin/api/edit-category/' + categoryId,
       type: 'get',
     }).done(res => {
+      console.log(res.sub_category[0].name, '----------');
       $('#editCategory').val(res.category);
       $('#editCategoryId').val(res._id);
       // Clear any existing options
       $('#subCatSelect').empty();
 
       // Add each option to the select element
-      $.each(res.sub_category, function(index, value) {
+      $.each(res.sub_category, function(index, subcategory) {
         $('#subCatSelect').append($('<option>', {
-          value: value,
-          text: value
+          value: subcategory.name,
+          text: subcategory.name
         }));
       });
+
       $('.modal').show()
       //to display the values in the select option to the subcatergory input
       $('#subCatSelect').on('change', function() {
@@ -341,7 +372,7 @@
               if (response.status) {
                 swal("Category has been deleted!", {
                   icon: "success",
-                }).then(()=>{
+                }).then(() => {
                   location.reload()
                 })
               } else {
@@ -380,5 +411,4 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: -1;
   }
-  
 </style>

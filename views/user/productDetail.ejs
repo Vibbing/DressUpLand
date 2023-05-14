@@ -55,7 +55,12 @@
                     </div>
                     <div class="clearfix product-price-cover">
                       <div class="product-price primary-color float-left">
-                        <ins><span class="text-brand">₹<%=product.price%></span></ins>
+                        <% if (product.discountedPrice > 0) { %>
+                          <ins><span class="discounted-price">₹<%= product.discountedPrice %></span></ins> 
+                          <ins><small class="text-muted" style="text-decoration: line-through; margin-left: 10px; font-size: 1.1rem;">₹<%= product.price %></small></ins>
+                        <% } else { %>
+                          <ins><span class="text-brand">₹<%= product.price %></span></ins>
+                        <% } %>
                         <!-- <ins><span class="old-price font-md ml-15"></span></ins>
                         <span class="save-price  font-md color3 ml-15">% Off</span> -->
                       </div>

@@ -38,6 +38,9 @@ router.post('/addCategory',adminController.postAddCategory)
 
 router.route('/api/edit-category/:id').get(auth.adminAuth,adminController.handleEditCategorys).patch(adminController.handleEditCategoryPatch);
 
+/* GET Sub Category list for Add Product Page. */
+router.route('/getSubcategories').post(adminController.getSubCategory)
+
 /* Delete Sub Category Page. */
 router.route('/remove-subCategory/:id').delete(adminController.removeSubCategory)
 
@@ -82,6 +85,19 @@ router.route('/coupon-list').get(auth.adminAuth,adminController.getCouponList)
 
 /* DELETE Coupon  Page. */
 router.route('/remove-coupon').delete(adminController.removeCoupon)
+
+/* GET and POST Sales Report Page. */
+router.route('/sales-report').get(adminController.getSalesReport).post(adminController.postSalesReport)
+
+router.route('/add-banner').get(auth.adminAuth,adminController.getAddBanner).post(multer.addBannerupload,adminController.postAddBanner)
+
+router.route('/banner-list').get(auth.adminAuth, adminController.getBannerList)
+
+router.route('/edit-banner').get(auth.adminAuth, adminController.getEditBanner)
+
+router.route('/edit-banner').post(multer.editBannerupload,adminController.postEditBanner)
+
+router.route('/delete-banner/:id').delete(auth.adminAuth,adminController.deleteBanner)
 
 
 /* GET error Page. */

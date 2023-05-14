@@ -85,9 +85,9 @@
 
             <% if (orders[0].orderConfirm === 'delivered') { %>
             <button class="btn-info btn-lg" onclick="returnOrder('<%=orderId%>','<%=orders[0].totalPrice%>')">Return</button>
-            <% } else if (orders[0].orderConfirm === 'canceled') { %>
+            <% } else if (orders[0].orderConfirm === 'Canceled') { %>
             <div id="canceled-message" style="color: red; font-size: 1.2rem;">Order Canceled.</div>
-            <% } else if (orders[0].orderConfirm === 'returned') { %>
+            <% } else if (orders[0].orderConfirm === 'Returned') { %>
               <div id="returned-message" style="color: red; font-size: 1.2rem;">Order Returned.</div>
             <% } else { %>
             <button class="btn-danger btn-lg mr-3" onclick="cancelOrder('<%=orderId%>','<%=orders[0].totalPrice%>')">Cancel</button>

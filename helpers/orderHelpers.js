@@ -5,6 +5,7 @@ const cartModel = require('../schema/models')
 const addressModel = require('../schema/models')
 const orderModel = require('../schema/models');
 const userModel = require('../schema/models')
+const productModel = require('../schema/models')
 const { promises } = require('dns');
 const { resolve } = require('path');
 const { response } = require('../app');
@@ -295,14 +296,25 @@ module.exports = {
                         })
                     }
 
-                    await cartModel.Cart.deleteMany({ user: data.user }).then(() => {
-                        resolve()
-                    })
+                    //inventory management 
+                    // update product quantity in the database
+                    for (let i = 0; i < productDetails.length; i++) {
+                        let purchasedProduct = productDetails[i];
+                        let originalProduct = await productModel.Product.findById(purchasedProduct.productId);
+                        let purchasedQuantity = purchasedProduct.quantity;
+                        originalProduct.quantity -= purchasedQuantity;
+                        await originalProduct.save();
+                        await cartModel.Cart.deleteMany({ user: data.user }).then(() => {
+                            resolve()
+                        })
+
+                    }
+
                 }
 
             })
         } catch (error) {
-            console.log(error.message);
+            throw error;
         }
     },
 
@@ -425,7 +437,7 @@ module.exports = {
     },
 
     generateRazorpay(userId, total) {
-        console.log(total,'razortotal');
+        console.log(total, 'razortotal');
         try {
             return new Promise(async (resolve, reject) => {
                 let orders = await orderModel.Order.find({ user: userId })
@@ -477,7 +489,7 @@ module.exports = {
 
     // change payment status
     changePaymentStatus: (userId, orderId, paymentId) => {
-        console.log(paymentId,'data----');
+        console.log(paymentId, 'data----');
         try {
             return new Promise(async (resolve, reject) => {
                 await orderModel.Order.updateOne(
@@ -510,11 +522,9 @@ module.exports = {
                     if (order.paymentMethod === 'razorpay' && order.paymentStatus === 'Paid') {
                         // Fetch payment details from Razorpay API
                         instance.payments.fetch(order.paymentId).then((payment) => {
-                            console.log(payment,'payment');
                             if (payment.status === 'captured') {
                                 // Initiate refund using the payment ID and refund amount
                                 instance.payments.refund(order.paymentId, { amount: order.totalPrice * 100 }).then((refund) => {
-                                    console.log(refund, 'refund');
                                     // Update order status in the database
                                     orderModel.Order.updateOne(
                                         { 'orders._id': orderId },
@@ -525,7 +535,6 @@ module.exports = {
                                             }
                                         }
                                     ).then((orders) => {
-                                        console.log(orders, '000');
                                         resolve(orders)
                                     });
                                 }).catch((error) => {
@@ -551,7 +560,6 @@ module.exports = {
                                 }
                             }
                         ).then((orders) => {
-                            console.log(orders, '111');
                             resolve(orders)
                         });
                     } else {
@@ -564,7 +572,6 @@ module.exports = {
                                 }
                             }
                         ).then((orders) => {
-                            console.log(orders, '222');
                             resolve(orders)
                         });
                     }
@@ -586,21 +593,57 @@ module.exports = {
                     let orderIndex = orders[0].orders.findIndex(
                         (orders) => orders._id == orderId
                     );
+                    let order = orders[0].orders.find((order) => order._id == orderId);
 
-                    orderModel.Order.updateOne(
-                        { 'orders._id': orderId },
-                        {
-                            $set: {
-                                ['orders.' + orderIndex + '.orderConfirm']: 'Returned',
-                                ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
+                    if (order.paymentMethod === 'razorpay' && order.paymentStatus === 'Paid') {
+                        // Fetch payment details from Razorpay API
+                        instance.payments.fetch(order.paymentId).then((payment) => {
+                            if (payment.status === 'captured') {
+                                // Initiate refund using the payment ID and refund amount
+                                instance.payments.refund(order.paymentId, { amount: order.totalPrice * 100 }).then((refund) => {
+                                    // Update order status in the database
+                                    orderModel.Order.updateOne(
+                                        { 'orders._id': orderId },
+                                        {
+                                            $set: {
+                                                ['orders.' + orderIndex + '.orderConfirm']: 'Returned',
+                                                ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
+                                            }
+                                        }
+                                    ).then((orders) => {
+                                        resolve(orders);
+                                    });
+                                }).catch((error) => {
+                                    console.log(error);
+                                    reject(error);
+                                });
+                            } else {
+                                console.log('Payment not captured');
+                                reject('Payment not captured');
                             }
-                        }
-                    ).then((orders) => {
-                        console.log(orders, '1');
-                        resolve(orders)
-                    })
-                })
-            })
+                        }).catch((error) => {
+                            console.log(error);
+                            reject(error);
+                        });
+                    } else if (order.paymentMethod === 'COD' || order.paymentMethod === 'wallet') {
+                        // Update order status in the database
+                        orderModel.Order.updateOne(
+                            { 'orders._id': orderId },
+                            {
+                                $set: {
+                                    ['orders.' + orderIndex + '.orderConfirm']: 'Returned',
+                                    ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
+                                }
+                            }
+                        ).then((orders) => {
+                            resolve(orders);
+                        });
+                    } else {
+                        console.log('Invalid payment method');
+                        reject('Invalid payment method');
+                    }
+                });
+            });
         } catch (error) {
             console.log(error.message);
         }
@@ -826,6 +869,38 @@ module.exports = {
             console.log(error.message);
         }
     },
+
+    //admin dashboard
+      // get order by date
+
+  getOrderByDate: () => {
+    return new Promise(async (resolve, reject) => {
+      const startDate = new Date();
+      await orderModel.Order
+        .find({ createdAt: { $gte: startDate } })
+        .then((response) => {
+          resolve(response);
+        });
+    });
+  },
+
+    // get orders by category wise
+
+    getOrderByCategory:()=>
+    {
+      return new Promise(async (resolve, reject) => {
+        await orderModel.Order.aggregate([
+          { $unwind: "$orders"},
+        ]).then((response)=>
+        {
+          const productDetails = response.map(order => order.orders.productDetails);
+          resolve(productDetails)
+  
+        })
+      })
+    },
+
+
 
     // updatePaymentStatus: (orderId, userId) => {
     //     try {

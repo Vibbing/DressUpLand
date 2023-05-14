@@ -5,7 +5,7 @@ const cartController = require('../controllers/cartController')
 const orderController = require('../controllers/orderControllers')
 const auth = require('../middleware/auth');
 const adminController = require('../controllers/adminController');
-
+const {checkProductQty} = require('../middleware/productQtyCheck')
 /* GET Home Page. */
 router.get('/',userController.getHomePage)
 
@@ -30,6 +30,9 @@ router.post('/otp-login', userController.otpLogin)
 /* Post Otp vefify Page. */
 router.post('/otp-verify', userController.otpVerify)
 
+/* Post Resend Otp Page. */
+router.post('/resend-otp', userController.resendOtp)
+
 /* GET Shop Page. */
 router.get('/shop',auth.userAuth, userController.getShop)
 
@@ -40,7 +43,7 @@ router.get('/product-detail/:id', auth.userAuth, userController.getProductDetail
 router.get('/cart-list',auth.userAuth, cartController.getCart)
 
 /* POST ADD To Cart Page */
-router.post('/add-to-cart/:id',cartController.addToCart)
+router.post('/add-to-cart/:id', checkProductQty,cartController.addToCart)
 
 /* POST Update cart quantity Page */
 router.patch('/change-product-quantity',auth.userAuth,cartController.updateQuantity)

@@ -120,6 +120,8 @@
 
                     <td class="image product-thumbnail"><img src="/productImages/<%=item.carted.img[0]%>" alt="#"></td>
                     <td>
+                      <input type="hidden" name="cartItems" id="cartItems" value="<%=item%>">
+                      <input type="hidden" name="quantity" id="quantity" value="<%=item.quantity%>">
                       <h5><a href="#"><%=item.carted.name%></a></h5> <span class="product-qty">x<%=item.quantity%></span>
                     </td>
                     <td>₹<%=item.carted.price%></td>
@@ -518,38 +520,52 @@
 
 
   function proceedToPayment() {
-    var selectedOption = $('input[name="payment_option"]:checked').val();
-    let cartId = $('#cartId').val()
-    $.ajax({
-      url: "/check-out",
-      method: 'POST',
-      data: $('#checkOut-form').serialize(),
-      success: (response) => {
-        if (response.error) {
-          Swal.fire({
-            title: 'Error!',
-            text: response.error,
-            icon: 'error',
-            timer: 5000
-          })
-        } else if ((response.codStatus == true) || (response.orderStatus == true)) {
-          Swal.fire({
-            title: 'Order Placed!',
-            text: 'Your order has been placed successfully.',
-            icon: 'success',
-            timer: 5000
-          }).then(() => {
-            location.href = '/'
-          })
-        } else {
+  var selectedOption = $('input[name="payment_option"]:checked').val();
+  let cartId = $('#cartId').val()
+  $.ajax({
+    url: "/check-out",
+    method: 'POST',
+    data: $('#checkOut-form').serialize(),
+    success: (response) => {
+      console.log(response,'+++++=========== ');
+      if (response.error) {
+        console.log(response,'error--------------------------------');
+
+        console.log(response.error.message,'---------------');
+        Swal.fire({
+          title: 'Error!',
+          text: response.error,
+          icon: 'error',
+          timer: 5000
+        })
+      } else if (response.codStatus == true) {
+        console.log(response,'status');
+        Swal.fire({
+          title: 'Order Placed!',
+          text: 'Your order has been placed successfully.',
+          icon: 'success',
+          timer: 5000
+        }).then(() => {
+          location.href = '/'
+        })
+      } else {
+        try {
           razorpay(response)
           console.log(response, '1');
           console.log(response.amount, '2');
+        } catch (error) {
+          Swal.fire({
+            title: 'Error!',
+            text: error.message,
+            icon: 'error',
+            timer: 5000
+          })
         }
       }
+    }
+  })
+}
 
-    })
-  }
 
 
   function razorpay(order) {

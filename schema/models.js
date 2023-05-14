@@ -14,8 +14,8 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String
     },
-    coupons : {
-        type : Array
+    coupons: {
+        type: Array
     },
     wallet: {
         type: Number,
@@ -59,19 +59,34 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String
     },
+    sub_category: {
+        type: String
+    },
+    discountedPrice: {
+        type: Number,
+        default: 0
+    },
     img: {
         type: Array
     }
 })
 
+
 const categorySchema = new mongoose.Schema({
     category: {
         type: String
     },
-    sub_category: {
-        type: Array
-    }
-})
+    sub_category: [{
+        name: {
+            type: String
+        },
+        offer: {
+            discount: { type: Number, default: 0 },
+            validFrom: { type: Date, default: undefined },
+            validTo: { type: Date, default: undefined }
+        }
+    }]
+});
 
 const cartSchema = new mongoose.Schema({
 
@@ -123,7 +138,7 @@ const orderSchema = new mongoose.Schema({
             fname: { type: String },
             lname: { type: String },
             phone: { type: Number },
-            paymentId: { type : String},
+            paymentId: { type: String },
             paymentMethod: { type: String },
             paymentStatus: { type: String },
             totalPrice: { type: Number },
@@ -171,17 +186,36 @@ const couponSchema = new mongoose.Schema({
     },
     validity: {
         type: Date,
-        default : new Date
-     },
-     minPurchase : { type : Number },
-     minDiscountPercentage : { type : Number },
-     maxDiscountValue : { type : Number},
-     description : { type : String},
-     createdAt : {
-        type : Date,
-        default : new Date
-     }
+        default: new Date
+    },
+    minPurchase: { type: Number },
+    minDiscountPercentage: { type: Number },
+    maxDiscountValue: { type: Number },
+    description: { type: String },
+    createdAt: {
+        type: Date,
+        default: new Date
+    }
 
+})
+
+const bannerSchema = new mongoose.Schema({
+    title: {
+        type: String
+    },
+    image: {
+        type: String
+    },
+    description: {
+        type: String
+    },
+    createdAt: {
+        type: Date,
+        default: new Date()
+    },
+    updatedAt: {
+        type: Date
+    }
 })
 
 module.exports = {
@@ -193,6 +227,7 @@ module.exports = {
     Address: mongoose.model('address', addressSchema),
     Order: mongoose.model('order', orderSchema),
     Wishlist: mongoose.model('wishlist', wishListSchema),
-    Coupon : mongoose.model('coupon', couponSchema)
+    Coupon: mongoose.model('coupon', couponSchema),
+    Banner : mongoose.model('banner',bannerSchema)
 
 }

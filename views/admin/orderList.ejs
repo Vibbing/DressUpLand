@@ -25,34 +25,36 @@
             </tr>
           </thead>
        
-            <% order?.orders.forEach(function(item,index) { %>
+            <% order?.orders.forEach(function(order,index) { %>
+
+            
 
           <tbody>
             <tr>
               <td><%=index + 1%></td>
-              <td><%=user[0].name%></td>
-              <td><template class="__cf_email__" data-cfemail="244041564d414a4164415c45495448410a474b49">[email&#160;protected]</template><%=user[0].email%></td>
-              <td>₹ <%=item.totalPrice%></td>
+              <td><%=order.shippingAddress[0].item.fname%></td>
+              <td><template class="__cf_email__" data-cfemail="244041564d414a4164415c45495448410a474b49">[email&#160;protected]</template><%=order.shippingAddress[0].item.email%></td>
+              <td>₹ <%=order.totalPrice%></td>
 
               <td>
-                <% if(item.paymentStatus === 'paid') { %>
-                <span class="badge rounded-pill alert-success"><%=item.paymentStatus%></span>
+                <% if(order.paymentStatus === 'paid') { %>
+                <span class="badge rounded-pill alert-success"><%=order.paymentStatus%></span>
                 <% } else { %> 
-                <span class="badge rounded-pill alert-danger"><%=item.paymentStatus%></span>
+                <span class="badge rounded-pill alert-danger"><%=order.paymentStatus%></span>
                 <% } %>
             </td>
             
               <td>
-                <% if(item.orderConfirm === 'canceled') { %>
-                <span class="badge rounded-pill alert-danger"><%=item.orderConfirm%></span>
+                <% if(order.orderConfirm === 'canceled') { %>
+                <span class="badge rounded-pill alert-danger"><%=order.orderConfirm%></span>
                 <% } else { %>
-                <span class="badge rounded-pill alert-success"><%=item.orderConfirm%></span>
+                <span class="badge rounded-pill alert-success"><%=order.orderConfirm%></span>
                 <% } %>
  
             </td>
-              <td><%= new Date(item.createdAt).toDateString()%></td>
+              <td><%= new Date(order.createdAt).toDateString()%></td>
               <td class="text-end">
-                <a href="/admin/order-details/?orderId=<%= item._id %>&userId=<%= user[0]._id %>" class="btn btn-md rounded font-sm">Detail</a>
+                <a href="/admin/order-details/?orderId=<%= order._id %>&userId=<%= userId%>" class="btn btn-md rounded font-sm">Detail</a>
 
               </td>
             </tr>

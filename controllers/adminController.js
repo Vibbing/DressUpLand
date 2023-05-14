@@ -1,5 +1,6 @@
 const express = require('express')
 const categoryModel = require('../schema/models')
+const productModel = require('../schema/models')
 const adminHelpers = require('../helpers/adminHelpers')
 const { Product } = require('../schema/models')
 const orderHelpers = require('../helpers/orderHelpers')
@@ -10,10 +11,84 @@ const couponHelpers = require('../helpers/couponHelpers')
 module.exports = {
 
     /* GET Dashboard */
-    getDashboard: (req, res) => {
-        let admin = req.session.admin
-        res.render('admin/dashboard', { layout: 'adminLayout', admin })
-    },
+    getDashboard: async (req, res) => {
+        admin = req.session.admin;
+        let totalProducts,
+          days = [];
+        let ordersPerDay = {};
+        let paymentCount = [];
+    
+        let Products = await adminHelpers.getAllProducts();
+        totalProducts = Products.length;
+    
+        await orderHelpers.getOrderByDate().then((response) => {
+          let result = response;
+          for (let i = 0; i < result.length; i++) {
+            for (let j = 0; j < result[i].orders.length; j++) {
+              let ans = {};
+              ans["createdAt"] = result[i].orders[j].createdAt;
+              days.push(ans);
+            }
+          }
+    
+          days.forEach((order) => {
+            let day = order.createdAt.toLocaleDateString("en-US", {
+              weekday: "long",
+            });
+            ordersPerDay[day] = (ordersPerDay[day] || 0) + 1;
+          });
+        });
+    
+        let getCodCount = await adminHelpers.getCodCount();
+    
+        let codCount = getCodCount.length;
+    
+        let getOnlineCount = await adminHelpers.getOnlineCount();
+        let onlineCount = getOnlineCount.length;
+    
+        let getWalletCount = await adminHelpers.getWalletCount();
+        let WalletCount = getWalletCount.length;
+    
+        paymentCount.push(onlineCount);
+        paymentCount.push(codCount);
+        paymentCount.push(WalletCount);
+    
+        let orderByCategory = await orderHelpers.getOrderByCategory()
+    
+        let Men=0, Women=0, Kids=0
+        orderByCategory[0].forEach((Products)=>
+        {
+          if(Products.category == 'Men') Men ++
+          if(Products.category == 'Women') Women ++
+          if(Products.category == 'Kids') Kids ++
+        })
+        let category = []
+        category.push(Men)
+        category.push(Women)
+        category.push(Kids)
+    
+    
+        await orderHelpers.getAllOrders().then((response) => {
+            console.log(response[0].orders[0].totalPrice,'response');
+          var length = response.length;
+    
+          let total = 0;
+    
+          for (let i = 0; i < length; i++) {
+            total += response[i].orders[i].totalPrice;
+          }
+          res.render('admin/dashboard', {
+            layout: "adminLayout",
+            admin,
+            length,
+            total,
+            totalProducts,
+            ordersPerDay,
+            paymentCount,
+            category
+          });
+        });
+      },
 
     /* GET Login Page. */
     getLogin: (req, res) => {
@@ -46,7 +121,7 @@ module.exports = {
     changeUserStatus: (req, res) => {
         let userId = req.query.id
         let status = req.query.status
-        if(status === 'false'){
+        if (status === 'false') {
             req.session.user = null
         }
         adminHelpers.changeUserStatus(userId, status).then(() => {
@@ -98,6 +173,14 @@ module.exports = {
         product.img = fileName
         adminHelpers.postAddProduct(product).then(() => {
             res.redirect('/admin/dashboard')
+        })
+    },
+
+    /* GET Sub Category list for Add Product Page. */
+    getSubCategory: (req, res) => {
+        let data = req.body
+        adminHelpers.getSubCategory(data).then((subCategory) => {
+            res.send(subCategory)
         })
     },
 
@@ -173,6 +256,7 @@ module.exports = {
             const catId = req.params.id;
             const category = await categoryModel.Category.findById(catId)
             if (category) {
+                console.log(category, 'category');
                 res.status(200).json(category);
             } else {
                 res.status(404).json({ message: 'Somthing went wrong..' });
@@ -185,18 +269,79 @@ module.exports = {
 
     handleEditCategoryPatch: async (req, res) => {
         try {
-            console.log(req.body)
+            // Check if sub-category already exists in the database
+            const category = await categoryModel.Category.findOne({
+                _id: req.body._id,
+                sub_category: {
+                    $elemMatch: {
+                        name: req.body.newSubCat
+                    }
+                }
+            });
 
-            await categoryModel.Category.updateOne({ _id: req.body._id }, { $push: { sub_category: req.body.newSubCat } });
-            res.status(202).json(true);
+            if (category) {
+                // Sub-category already exists, update the discount and dates
+                await categoryModel.Category.updateOne(
+                    { _id: req.body._id, "sub_category.name": req.body.newSubCat },
+                    {
+                        $set: {
+                            "sub_category.$.offer.discount": req.body.offer_percentage,
+                            "sub_category.$.offer.validFrom": req.body.valid_from,
+                            "sub_category.$.offer.validTo": req.body.valid_to
+                        }
+                    }
+                );
+                // Find all products associated with the subcategory and update their prices
+                const products = await productModel.Product.find({ sub_category: req.body.newSubCat })
+                products.forEach(async (product) => {
+                    const originalPrice = product.price
+                    const discount = req.body.offer_percentage / 100
+                    const discountedPrice = Math.floor(originalPrice - (originalPrice * discount));
+                    console.log(discountedPrice,'discount');
+                    console.log(originalPrice,'originalPrice');
+                    console.log(req.body.discount,'req.body.discount');
+                    console.log(req.body,'req.body');
+                    
+                    await productModel.Product.updateOne(
+                        { _id: product._id },
+                        {
+                            $set: {
+                                discountedPrice: discountedPrice
+                            }
+                        })
+                })
+            } else {
+                // Sub-category doesn't exist, push it into the sub_category array with the discount and dates
+                await categoryModel.Category.updateOne(
+                    { _id: req.body._id },
+                    {
+                        $push: {
+                            sub_category: {
+                                name: req.body.newSubCat,
+                                offer: {
+                                    discount: req.body.offer_percentage,
+                                    validFrom: req.body.valid_from,
+                                    validTo: req.body.valid_to
+                                }
+                            }
+                        }
+                    }
+                );
+            }
+
+            res.status(200).json({ message: "Sub-category updated successfully" });
         } catch (error) {
-            res.status(404).redirect('/error')
+            console.error(error);
+            res.status(500).json({ error: "Internal server error" });
         }
     },
 
-    removeSubCategory:(req,res)=>{
+
+
+
+    removeSubCategory: (req, res) => {
         let cartId = req.params.id
-        adminHelpers.deleteSubCategory(cartId, req.body.newSubCat).then((response)=>{
+        adminHelpers.deleteSubCategory(cartId, req.body.newSubCat).then((response) => {
             res.send(response)
         })
     },
@@ -213,9 +358,11 @@ module.exports = {
         let userId = req.params.id
         let admin = req.session.admin
         // orderHelpers.getAddress(userId).then((address) => {
-        adminHelpers.getUserList().then((user) => {
+        adminHelpers.getUserList(userId).then((user) => {
+            console.log(user, 'user');
             orderHelpers.getOrders(userId).then((order) => {
-                res.render('admin/orderList', { layout: 'adminLayout', user, admin, order })
+                console.log(order.orders[0].shippingAddress[0].item.fname, 'order');
+                res.render('admin/orderList', { layout: 'adminLayout', user, userId, admin, order })
             })
         })
         // })
@@ -232,7 +379,13 @@ module.exports = {
                 orderHelpers.getOrderedProducts(orderId, userId).then((product) => {
                     orderHelpers.getTotal(orderId, userId).then((productTotalPrice) => {
                         orderHelpers.getOrderTotal(orderId, userId).then((orderTotalPrice) => {
+                            // console.log('admin',admin,'admin');
                             // console.log('orderDetails',orderDetails,'orderDetails');
+                            // console.log('address',address,'address');
+                            // console.log('product',product,'product');
+                            // console.log('productTotalPrice',productTotalPrice,'productTotalPrice');
+                            // console.log('orderTotalPrice',orderTotalPrice,'orderTotalPrice');
+                            // console.log('userDetails',userDetails,'userDetails');
                             // console.log('orderId',orderId,'orderId');
                             res.render('admin/orderDetails', {
                                 layout: 'adminLayout', admin, userDetails,
@@ -246,51 +399,145 @@ module.exports = {
     },
 
     /* GET Add Coupon Page. */
-    getAddCoupon:(req,res)=>{
+    getAddCoupon: (req, res) => {
         let admin = req.session.admin
-        res.render('admin/addCoupon',{layout : 'adminLayout', admin})
+        res.render('admin/addCoupon', { layout: 'adminLayout', admin })
     },
 
     /* GET Generate Coupon Code Page. */
-    generatorCouponCode:(req,res)=>{
-        couponHelpers.generatorCouponCode().then((couponCode)=>{
-            console.log(couponCode,'-----');
+    generatorCouponCode: (req, res) => {
+        couponHelpers.generatorCouponCode().then((couponCode) => {
+            console.log(couponCode, '-----');
             res.send(couponCode)
         })
     },
 
     /* Post Add Coupone Page. */
-    postaddCoupon:(req,res)=>{
+    postaddCoupon: (req, res) => {
         let data = {
-            couponCode : req.body.coupon,
-            validity : req.body.validity,
-            minPurchase : req.body.minPurchase,
-            minDiscountPercentage : req.body.minDiscountPercentage,
-            maxDiscountValue : req.body.maxDiscount,
-            description : req.body.description
+            couponCode: req.body.coupon,
+            validity: req.body.validity,
+            minPurchase: req.body.minPurchase,
+            minDiscountPercentage: req.body.minDiscountPercentage,
+            maxDiscountValue: req.body.maxDiscount,
+            description: req.body.description
         }
-        couponHelpers.postaddCoupon(data).then((response)=>{
+        couponHelpers.postaddCoupon(data).then((response) => {
             res.send(response)
         })
     },
 
     /* GET Coupon List Page. */
-    getCouponList:(req,res)=>{
+    getCouponList: (req, res) => {
         let admin = req.session.admin
         console.log('called coupon list page')
-        couponHelpers.getCouponList().then((couponList)=>{
-            res.render('admin/couponList',{layout : 'adminLayout', admin, couponList})
+        couponHelpers.getCouponList().then((couponList) => {
+            res.render('admin/couponList', { layout: 'adminLayout', admin, couponList })
         })
     },
 
-    
+
     /* DELETE Coupon  Page. */
-    removeCoupon:(req,res)=>{
+    removeCoupon: (req, res) => {
         let couponId = req.body.couponId
-        couponHelpers.removeCoupon(couponId).then((successResponse)=>{
+        couponHelpers.removeCoupon(couponId).then((successResponse) => {
             res.send(successResponse)
         })
-    }
+    },
+
+    /* GET Sales Report Page. */
+    getSalesReport: async (req, res) => {
+        let admin = req.session.admin
+        let report = await adminHelpers.getSalesReport()
+        let details = []
+        const getDate = (date) => {
+            let orderDate = new Date(date)
+            let day = orderDate.getDate()
+            let month = orderDate.getMonth() + 1
+            let year = orderDate.getFullYear()
+            return `${isNaN(day) ? "00" : day} - ${isNaN(month) ? "00" : month} - ${isNaN(year) ? "0000" : year}`
+        }
+
+        report.forEach((orders) => {
+            details.push(orders.orders)
+        })
+
+        res.render("admin/salesReport", { layout: 'adminLayout', admin, details, getDate })
+    },
+
+    /* POST Sales Report Page. */
+    postSalesReport: (req, res) => {
+        let admin = req.session.admin
+        let details = []
+        const getDate = (date) => {
+            let orderDate = new Date(date)
+            let day = orderDate.getDate()
+            let month = orderDate.getMonth() + 1
+            let year = orderDate.getFullYear()
+            return `${isNaN(day) ? "00" : day} - ${isNaN(month) ? "00" : month} - ${isNaN(year) ? "0000" : year}`
+        }
+
+        adminHelpers.postReport(req.body).then((orderData) => {
+            console.log(orderData, 'orderData');
+            orderData.forEach((orders) => {
+                details.push(orders.orders)
+            })
+
+            res.render("admin/salesReport", { layout: 'adminLayout', admin, details, getDate })
+        })
+
+    },
+
+
+    getAddBanner:(req,res)=>{
+        let admin = req.session.admin
+        res.render('admin/addBanner',{layout : 'adminLayout',admin})
+    },
+
+    postAddBanner: (req, res) => {
+        adminHelpers.addBanner(req.body, req.file.filename).then((response) => {
+          if (response) {
+            console.log(response,'000');
+            res.redirect("/admin/add-banner");
+          } else {
+            res.status(505);
+          }
+        });
+      },
+
+      getBannerList:(req,res)=>{
+        let admin = req.session.admin
+        adminHelpers.getBannerList().then((banner)=>{
+            console.log(banner,'banner');
+
+            res.render('admin/bannerList',{layout : 'adminLayout',admin,banner})
+        })
+      },
+
+      getEditBanner:(req,res)=>{
+        let admin = req.session.admin
+        adminHelpers.getEditBanner(req.query.banner).then((banner)=>{
+            res.render("admin/editBanner", {layout : "adminLayout", admin, banner})
+        })
+      },
+
+      postEditBanner:(req,res)=>{
+        console.log(req.query.editbanner,'req.query.editbanner');
+        console.log( req.body,'req.body');
+        console.log( req?.file?.filename,' req?.file?.filename');
+        adminHelpers.postEditBanner(req.query.editbanner, req.body, req?.file?.filename).then((response)=>{
+            res.redirect("/admin/banner-list")
+        })
+      },
+
+      deleteBanner:(req,res)=>{
+        adminHelpers.deleteBanner(req.params.id).then((response)=>{
+            res.send(response)
+        })
+      }
+    
+
+
     // errorPage:(req,res)=>{
     //     res.render('error',{layout : 'adminlayout'})
     // }

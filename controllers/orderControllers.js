@@ -59,22 +59,31 @@ module.exports = {
             let couponCode = data.couponCode
             console.log(total,couponCode,'---------');
             await couponHelpers.addCouponToUser(couponCode, userId)
-            await orderHelpers.placeOrder(data).then(async (response) => {
+            try {
+                const response = await orderHelpers.placeOrder(data);
+                console.log(response,'response');
                 if (data.payment_option === "COD") {
                     res.json({ codStatus: true });
                 } else if (data.payment_option === "razorpay") {
-                    await orderHelpers.generateRazorpay(req.session.user._id, total).then((order) => {
-                        console.log(order, ';;');
-                        res.json(order)
-                    })
+                    const order = await orderHelpers.generateRazorpay(req.session.user._id, total);
+                    console.log(order, ';;');
+                    res.json(order);
                 } else if (data.payment_option === 'wallet') {
                     res.json({ orderStatus: true, message: 'order placed successfully' })
                 }
-            })
+            } catch (error) {
+                console.log('got here ----');
+                console.log({error : error.message},'22');
+                res.json({status : false , error : error.message})
+            }
         } catch (error) {
-            res.json({ error: error.message })
+            console.error(error);
+            res.status(500).json({ error: error.message });
         }
     },
+    
+    
+    
 
     orderDetails: async (req, res) => {
         let user = req.session.user;
@@ -85,7 +94,7 @@ module.exports = {
         orderHelpers.findOrder(orderId, userId).then((orders) => {
             orderHelpers.findAddress(orderId, userId).then((address) => {
                 orderHelpers.findProduct(orderId, userId).then((product) => {
-                    console.log(orders, '====');
+                    console.log(orders[0].orderConfirm, '====');
                     res.render('user/orderDetails', { user, count, product, address, orders, orderId, wishlistCount })
                 })
             })
@@ -122,11 +131,11 @@ module.exports = {
         let total = req.query.total
         let userId = req.session.user._id
         orderHelpers.returnOrder(orderId, userId).then((returnOrderStatus) => {
-            orderHelpers.addWallet(userId, total).then((walletStatus) => {
+            // orderHelpers.addWallet(userId, total).then((walletStatus) => {
                 // orderHelpers.updatePaymentStatus(orderId, userId).then((paymentStatus) => {
                 res.send(returnOrderStatus)
                 // })
-            })
+            // })
         })
     },
 
