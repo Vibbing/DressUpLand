@@ -41,7 +41,7 @@ module.exports = {
 
     /* GET Login Page. */
     getLogin: (req, res) => {
-        res.render('user/login')
+        res.render('user/login', {layout: "Layout"})
     },
 
     /* Post Login Page. */
