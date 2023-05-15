@@ -20,7 +20,7 @@ const viewsPath = path.join(__dirname, 'views')
 
 app.set('view engine', 'ejs');
 app.use(expressLayouts)
-app.set('views', viewsPath);
+app.set('views', __dirname);
 // app.use(logger('dev'));
 app.use(express.json());
 
