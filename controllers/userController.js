@@ -20,7 +20,7 @@ module.exports = {
             var count = await cartHelpers.getCartCount(user._id)
             var wishlistCount = await wishListHelpers.getWishListCount(user._id)
         }
-        res.render('homePage', { layout: 'Layout', user, count, wishlistCount })
+        res.render('homePage', { layout: 'layout', user, count, wishlistCount })
     },
 
     /* GET SignUp Page. */
@@ -41,7 +41,7 @@ module.exports = {
 
     /* GET Login Page. */
     getLogin: (req, res) => {
-        res.render('user/login', {layout: "Layout"})
+        res.render('user/login')
     },
 
     /* Post Login Page. */
@@ -137,13 +137,13 @@ module.exports = {
             noProductFound ?
                 req.session.noProductFound = noProductFound
                 : req.session.selectedProducts = product
-            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, productResult: req.session.noProductFound })
+            res.render('user/shop', { layout: 'layout', product, user, count, wishlistCount, productResult: req.session.noProductFound })
         } else {
             console.log('fetching all products')
             product = await userHelper.getShop()
             if (product.length != 0)
                 req.session.noProductFound = false
-            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, productResult: req.session.noProduct })
+            res.render('user/shop', { layout: 'layout', product, user, count, wishlistCount, productResult: req.session.noProduct })
             req.session.noProductFound = false
 
         }
