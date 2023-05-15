@@ -17,10 +17,10 @@ const dataBase = require('./database/connection')
 const app = express();
 const viewsPath = path.join(__dirname, 'views') 
 // view engine setup
-app.set('views', viewsPath);
+
 app.set('view engine', 'ejs');
 app.use(expressLayouts)
-
+app.set('views', viewsPath);
 // app.use(logger('dev'));
 app.use(express.json());
 
