@@ -21,7 +21,7 @@ module.exports = {
             let address = await orderHelpers.getAddress(user._id)
             let orders = await orderHelpers.getOrders(user._id)
             // let product = await orderHelpers.getProduct()
-            res.render('user/profile', { user, userData, count, address, orders, wishlistCount })
+            res.render('user/profile', { layout: 'Layout', user, userData, count, address, orders, wishlistCount })
         }
 
     },

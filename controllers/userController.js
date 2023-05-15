@@ -160,8 +160,7 @@ module.exports = {
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         userHelper.getProductDetail(proId).then((product) => {
-            console.log(product,'=+==');
-            res.render('user/productDetail', { product, user, count, wishlistCount })
+            res.render('user/productDetail', {layout: 'Layout', product, user, count, wishlistCount })
         })
     },
 
@@ -182,7 +181,7 @@ module.exports = {
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         wishListHelpers.getWishListProducts(user._id).then((wishlistProducts) => {
-            res.render('user/wishList', { user, count, wishlistProducts, wishlistCount })
+            res.render('user/wishList', {layout: 'Layout', user, count, wishlistProducts, wishlistCount })
         })
     },
 

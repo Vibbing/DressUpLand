@@ -13,7 +13,7 @@ module.exports = {
     if(req.session.user){
         next()
     }else{
-        res.render('user/login')
+        res.render('user/login', { layout: 'Layout'})
     }
    },
 
