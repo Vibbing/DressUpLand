@@ -137,7 +137,7 @@ module.exports = {
             noProductFound ?
                 req.session.noProductFound = noProductFound
                 : req.session.selectedProducts = product
-            res.render('user/shop', { layout: './Layout', product, user, count, wishlistCount, productResult: req.session.noProductFound })
+            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, productResult: req.session.noProductFound })
         } else {
             console.log('fetching all products')
             product = await userHelper.getShop()
