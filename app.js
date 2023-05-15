@@ -15,11 +15,11 @@ const DB_URL = process.env.DB_URL
 const dataBase = require('./database/connection')
 
 const app = express();
-
+const viewsPath = path.join(__dirname, 'views') 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', viewsPath);
 app.set('view engine', 'ejs');
-// app.use(expressLayouts)
+app.use(expressLayouts)
 
 // app.use(logger('dev'));
 app.use(express.json());
