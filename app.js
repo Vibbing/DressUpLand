@@ -15,7 +15,7 @@ const DB_URL = process.env.DB_URL
 const dataBase = require('./database/connection')
 
 const app = express();
-const viewsPath = path.join(__dirname, '../views') 
+const viewsPath = path.join(__dirname, 'views') 
 // view engine setup
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
