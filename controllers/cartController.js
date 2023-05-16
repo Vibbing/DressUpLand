@@ -16,7 +16,7 @@ module.exports = {
         let total = await orderHelpers.totalCheckOutAmount(userId)
         let subTotal = await orderHelpers.getSubTotal(userId)
         cartHelpers.getCartItems(userId).then((cartItems) => {
-            res.render('user/cart', { user, cartItems, subTotal, total, count, wishlistCount })
+            res.render('user/cart', { layout :'Layout', user, cartItems, subTotal, total, count, wishlistCount })
         })
     },
 
