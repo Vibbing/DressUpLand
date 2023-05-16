@@ -91,10 +91,8 @@ module.exports = {
         
 
         let number = req.session.number
-        console.log(otp,req.body,number,'--');
         const user = await userModel.User.findOne({ mobile: number }).lean().exec()
         req.session.user = user;
-        console.log(user);
         try {
             const status = await otpVerify(otp, number)
 
