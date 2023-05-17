@@ -45,7 +45,7 @@ module.exports = {
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         let address = await orderHelpers.getAddress(userId)
         cartHelpers.getCartItems(userId).then((cartItems) => {
-            res.render('user/checkOut', { user, cartItems, total, count, address, wishlistCount })
+            res.render('user/checkOut', { layout: 'Layout', user, cartItems, total, count, address, wishlistCount })
         })
     },
 
