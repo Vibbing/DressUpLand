@@ -630,6 +630,7 @@
 
   function applyCoupon(total) {
     let couponCode = document.getElementById('couponCode').value
+    console.log('+++++===');
     $.ajax({
       url: '/coupon-verify/' + couponCode,
       method: 'GET',
