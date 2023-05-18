@@ -125,7 +125,7 @@
           url: `/cancel-order/?id=${orderId}&total=${total}`,
           method: 'POST',
           success: (canceled) => {
-            var cancelButton = document.querySelector(".btn-danger");
+            let cancelButton = document.querySelector(".btn-danger");
             cancelButton.parentNode.innerHTML = '<div id="returned-message" style="color:red; font-size: 1.2rem;">Order canceled.</div>';
 
           }

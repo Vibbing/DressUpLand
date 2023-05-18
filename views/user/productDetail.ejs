@@ -43,23 +43,23 @@
                     <h2 class="title-detail"><%=product.name%></h2>
                     <div class="product-detail-rating">
                       <div class="pro-details-brand">
-                        <span> Category:<%=product.category%> <a href="shop-grid-right.html"></a></span>
+                        <span> <strong >Category&nbsp; :&nbsp; </strong><%=product.category%> <a href="shop-grid-right.html"></a></span>
                       </div>
-                      <div class="product-rate-cover text-end">
+                      <!-- <div class="product-rate-cover text-end">
                         <div class="product-rate d-inline-block">
                           <div class="product-rating" style="width:90%">
                           </div>
                         </div>
                         <span class="font-small ml-5 text-muted"> (25 reviews)</span>
-                      </div>
+                      </div> -->
                     </div>
                     <div class="clearfix product-price-cover">
                       <div class="product-price primary-color float-left">
                         <% if (product.discountedPrice > 0) { %>
-                          <ins><span class="discounted-price">₹<%= product.discountedPrice %></span></ins> 
-                          <ins><small class="text-muted" style="text-decoration: line-through; margin-left: 10px; font-size: 1.1rem;">₹<%= product.price %></small></ins>
+                        <ins><span class="discounted-price">₹<%= product.discountedPrice %></span></ins>
+                        <ins><small class="text-muted" style="text-decoration: line-through; margin-left: 10px; font-size: 1.1rem;">₹<%= product.price %></small></ins>
                         <% } else { %>
-                          <ins><span class="text-brand">₹<%= product.price %></span></ins>
+                        <ins><span class="text-brand">₹<%= product.price %></span></ins>
                         <% } %>
                         <!-- <ins><span class="old-price font-md ml-15"></span></ins>
                         <span class="save-price  font-md color3 ml-15">% Off</span> -->
@@ -89,7 +89,7 @@
                           <% } %>
 
 
-                          <button type="submit" class="button button-add-to-cart" onclick="addToWishlist('<%product._id%>')
+                          <button type="submit" class="button button-add-to-cart" onclick="addToWishList('<%=product._id%>')
                                                 "><i class="fi-rs-heart"></i></button>
 
                           <!-- <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a> -->
@@ -97,6 +97,7 @@
                         </div>
                       </div>
                       <ul class="product-meta font-xs color-grey mt-50">
+                        <li class="mb-5"> <strong class="h5">Description&nbsp; :&nbsp;</strong>  <%=product.description%></li>
                         <li class="mb-5">Tags: <a href="#" rel="tag">Cloth</a>, <a href="#" rel="tag">UniSex</a>, <a href="#" rel="tag">Dress</a> </li>
                         <!-- <li>Availability:<span class="in-stock text-success ml-5"><%=product.quantity%> Items In Stock</span></li> -->
                       </ul>
@@ -144,15 +145,36 @@
 
   }
 
-  function addToWishlist(prodId) {
+  //add to wish list ajax call
+  function addToWishList(proId) {
     $.ajax({
-      url: "/add_to_wishlist/" + prodId,
-      method: "get",
+      url: '/add-to-wishlist',
+      method: 'POST',
+      data: {
+        proId: proId
+      },
       success: (response) => {
         if (response.status) {
-          let wishlistCount = $("#wishlist-count").html();
-          wishlistCount = parseInt(wishlistCount) + 1;
-          $("#wishlist-count").html(wishlistCount);
+          // Product added to Wishlist successfully
+          Swal.fire({
+            icon: 'success',
+            title: 'Product added to Wishlist!',
+            showConfirmButton: false,
+            timer: 3000
+          });
+          // Reload page after 3 seconds
+          setTimeout(function() {
+            location.reload();
+          }, 3000);
+
+        } else {
+          // Error adding product to Wishlist
+          Swal.fire({
+            icon: 'error',
+            title: 'Product already exist in Wishlist',
+            timer: 3000
+          });
+
         }
       }
     })

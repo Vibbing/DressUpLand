@@ -186,7 +186,10 @@ module.exports = {
     addWishList: (req, res) => {
         let proId = req.body.proId
         let userId = req.session.user._id
+        console.log(proId,'1');
+        console.log(userId,'2');
         wishListHelpers.addWishList(userId, proId).then((response) => {
+            console.log(response,'3');
             res.send(response)
         })
     },
