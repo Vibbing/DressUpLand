@@ -95,7 +95,7 @@ module.exports = {
             orderHelpers.findAddress(orderId, userId).then((address) => {
                 orderHelpers.findProduct(orderId, userId).then((product) => {
                     console.log(orders[0].orderConfirm, '====');
-                    res.render('user/orderDetails', { user, count, product, address, orders, orderId, wishlistCount })
+                    res.render('user/orderDetails', { layout: 'Layout', user, count, product, address, orders, orderId, wishlistCount })
                 })
             })
         })

@@ -50,7 +50,7 @@
   <% }else {%>
   <div class="empty-wishlist-container ">
     <div class="empty-wishlist ">
-      <h2>Cart is empty</h2>
+      <h2 class="heading mr-50">Wishlist is empty</h2>
       <br>
       <br>
       <br>
@@ -60,7 +60,7 @@
       <br>
       <br>
       <br>
-      <a href="/shop"><p>Back to Shopping!!</p></a>
+      <a href="/shop"><p class="footer mr-50">Back to Shopping!!</p></a>
     </div>
   </div>
   <%}%>
@@ -71,12 +71,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
 }
 
 .empty-wishlist {
   text-align: center;
-  width: 30%;
+  width: 25%;
+  margin-top: 5%; /* Adjust the top margin as needed */
+  margin-bottom: 5%; /* Adjust the bottom margin as needed */
 }
 
 .small-image {
