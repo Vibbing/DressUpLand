@@ -69,14 +69,17 @@ module.exports = {
     
     
         await orderHelpers.getAllOrders().then((response) => {
-            console.log(response[0].orders[0].totalPrice,'response');
-          var length = response.length;
-    
-          let total = 0;
-    
-          for (let i = 0; i < length; i++) {
-            total += response[i].orders[i].totalPrice;
-          }
+            console.log(response[0].orders.totalPrice, 'response');
+            let length = response.length;
+          
+            let total = 0;
+          
+            for (let i = 0; i < length; i++) {
+              console.log(response[i].orders.totalPrice);
+              for (let j = 0; j < response[i].orders.length; j++) {
+                total += response[i].orders[j].totalPrice;
+              }
+            }
           res.render('admin/dashboard', {
             layout: "adminLayout",
             admin,

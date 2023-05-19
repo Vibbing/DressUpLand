@@ -36,6 +36,7 @@
 <main class="main">
   <div class="page-header breadcrumb-wrap">
   </div>
+  <% if (count > 0) { %>
   <section class="mt-50 mb-50">
     <div class="container">
       <div class="row">
@@ -63,7 +64,11 @@
                     <p class="font-xs"><%=item.carted.name%><br>
                     </p>
                   </td>
+                  <% if(item.carted.discountedPrice > 0) { %>
+                  <td class="price" data-title="Price"><span>₹<%=item.carted.discountedPrice%></span></td>
+                  <% } else { %>
                   <td class="price" data-title="Price"><span>₹<%=item.carted.price%></span></td>
+                  <% } %>
                   <td class="text-center" data-title="Stock">
                     <div class="detail-qty border radius m-auto">
                       <button class="qty-btn" onclick="changeQuantity('<%= item._id %>','<%=item.item%>','<%=user._id%>','<%=index%>',-1)"><i class="fi-rs-angle-small-down"></i></button>
@@ -144,6 +149,23 @@
     </div>
     </div>
   </section>
+  <% } else { %>
+    <div class="empty-cart-container ">
+      <div class="empty-cart ">
+        <h2>Cart is empty</h2>
+        <br>
+        <br>
+        <br>
+        <br>
+        <img src="/frontEnd/imgs/theme/shopping-cart.png" alt="Empty Cart">
+        <br>
+        <br>
+        <br>
+        <br>
+        <a href="/shop"><p>Back to Shopping!!</p></a>
+      </div>
+    </div>
+    <% } %>
 </main>
 <style>
   .qty-btn {
@@ -152,7 +174,26 @@
     color: #555;
     cursor: pointer;
     font-size: 14px;
-    padding: 5px 10px;
+    
+  }
+
+  .empty-cart-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .empty-cart {
+    text-align: center;
+    width: 25%;
+    margin-top: 5%; /* Adjust the top margin as needed */
+    margin-bottom: 5%; /* Adjust the bottom margin as needed */
+    
+  }
+
+  .empty-cart img {
+    max-width: 100%;
+    height: auto;
   }
 
 </style>

@@ -1,4 +1,5 @@
 <main class="main">
+  <% if(wishlistCount > 0) { %>
 
   <section class="mt-50 mb-50">
     <div class="container">
@@ -46,9 +47,44 @@
       </div>
     </div>
   </section>
+  <% }else {%>
+  <div class="empty-wishlist-container ">
+    <div class="empty-wishlist ">
+      <h2>Cart is empty</h2>
+      <br>
+      <br>
+      <br>
+      <br>
+      <img src="/frontEnd/imgs/theme/wishlist.png" alt="Empty wishlist">
+      <br>
+      <br>
+      <br>
+      <br>
+      <a href="/shop"><p>Back to Shopping!!</p></a>
+    </div>
+  </div>
+  <%}%>
 </main>
 
+<style>
+  .empty-wishlist-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
+.empty-wishlist {
+  text-align: center;
+  width: 30%;
+}
+
+.small-image {
+  max-width: 50%;
+  height: auto;
+}
+
+</style>
 
 <script>
   // add to cart ajax call

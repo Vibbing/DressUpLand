@@ -27,107 +27,104 @@ module.exports = {
 
     totalCheckOutAmount: (userId) => {
         try {
-            return new Promise((resolve, reject) => {
-                cartModel.Cart.aggregate([
-                    {
-                        $match: {
-                            user: new ObjectId(userId)
-                        }
-                    },
-                    {
-                        $unwind: "$cartItems"
-                    },
-                    {
-                        $project: {
-                            item: "$cartItems.productId",
-                            quantity: "$cartItems.quantity"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "products",
-                            localField: "item",
-                            foreignField: "_id",
-                            as: "carted"
-                        }
-                    },
-                    {
-                        $project: {
-                            item: 1,
-                            quantity: 1,
-                            product: { $arrayElemAt: ["$carted", 0] }
-                        }
-                    },
-                    {
-                        $group: {
-                            _id: null,
-                            total: { $sum: { $multiply: ["$quantity", "$product.price"] } }
-                        }
+          return new Promise((resolve, reject) => {
+            cartModel.Cart.aggregate([
+              {
+                $match: {
+                  user: new ObjectId(userId)
+                }
+              },
+              {
+                $unwind: "$cartItems"
+              },
+              {
+                $lookup: {
+                  from: "products",
+                  localField: "cartItems.productId",
+                  foreignField: "_id",
+                  as: "carted"
+                }
+              },
+              {
+                $project: {
+                  item: "$cartItems.productId",
+                  quantity: "$cartItems.quantity",
+                  price: {
+                    $cond: {
+                      if: { $gt: [{ $arrayElemAt: ["$carted.discountedPrice", 0] }, 0] },
+                      then: { $arrayElemAt: ["$carted.discountedPrice", 0] },
+                      else: { $arrayElemAt: ["$carted.price", 0] }
                     }
-                ])
-                    .then((total) => {
-                        resolve(total[0]?.total)
-                    })
+                  }
+                }
+              },
+              {
+                $group: {
+                  _id: null,
+                  total: { $sum: { $multiply: ["$quantity", "$price"] } }
+                }
+              }
+            ])
+            .then((total) => {
+              resolve(total[0]?.total)
             })
+          })
         } catch (error) {
-            console.log(error.message);
+          console.log(error.message);
         }
-    },
+      },
+      
 
     //to get the sub total 
     getSubTotal: (userId) => {
         try {
-            return new Promise((resolve, reject) => {
-                cartModel.Cart.aggregate([
-                    {
-                        $match: {
-                            user: new ObjectId(userId)
-                        }
-                    },
-                    {
-                        $unwind: "$cartItems"
-                    },
-                    {
-                        $project: {
-                            item: "$cartItems.productId",
-                            quantity: "$cartItems.quantity"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "products",
-                            localField: "item",
-                            foreignField: "_id",
-                            as: "carted"
-                        }
-                    },
-                    {
-                        $project: {
-                            item: 1,
-                            quantity: 1,
-
-                            price: {
-                                $arrayElemAt: ["$carted.price", 0]
-                            }
-                        }
-                    },
-                    {
-                        $project: {
-                            total: { $multiply: ["$quantity", "$price"] }
-                        }
+          return new Promise((resolve, reject) => {
+            cartModel.Cart.aggregate([
+              {
+                $match: {
+                  user: new ObjectId(userId)
+                }
+              },
+              {
+                $unwind: "$cartItems"
+              },
+              {
+                $lookup: {
+                  from: "products",
+                  localField: "cartItems.productId",
+                  foreignField: "_id",
+                  as: "carted"
+                }
+              },
+              {
+                $project: {
+                  item: "$cartItems.productId",
+                  quantity: "$cartItems.quantity",
+                  price: {
+                    $cond: {
+                      if: { $gt: [{ $arrayElemAt: ["$carted.discountedPrice", 0] }, 0] },
+                      then: { $arrayElemAt: ["$carted.discountedPrice", 0] },
+                      else: { $arrayElemAt: ["$carted.price", 0] }
                     }
-                ])
-                    .then((total) => {
-
-                        const totals = total.map(obj => obj.total)
-
-                        resolve({ total, totals })
-                    })
+                  }
+                }
+              },
+              {
+                $project: {
+                  total: { $multiply: ["$quantity", "$price"] }
+                }
+              }
+            ])
+            .then((total) => {
+              const totals = total.map(obj => obj.total)
+              resolve({ total, totals })
             })
+          })
         } catch (error) {
-            console.log(error.message);
+          console.log(error.message);
         }
-    },
+      },
+      
 
     /* GET Address Page */
     getAddress: (userId) => {

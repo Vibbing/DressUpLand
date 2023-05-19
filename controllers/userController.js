@@ -179,6 +179,7 @@ module.exports = {
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         wishListHelpers.getWishListProducts(user._id).then((wishlistProducts) => {
+            console.log(wishlistCount,'count');
             res.render('user/wishList', {layout: 'Layout', user, count, wishlistProducts, wishlistCount })
         })
     },
