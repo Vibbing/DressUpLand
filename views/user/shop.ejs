@@ -130,18 +130,16 @@
         proId: proId
       },
       success: (response) => {
-        location.reload()
-        console.log(response)
-        if (response.error) {
+        if(response.status){
+          location.reload()
+        }else if (response.error) {
           Swal.fire({
             icon: 'warning',
             title: response.message,
             showConfirmButton: false,
-            timer: 3000
-          }).then(() => {
-            location.reload()
-
+            timer: 4000
           })
+ 
         }
       }
     })

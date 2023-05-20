@@ -322,13 +322,13 @@ module.exports = {
                         $match: {
                             $and: [
                                 { "orders.orderConfirm": "delivered" },
-                                { "orders.createdAt": { $gte: start, $lte: end } }
+                                { "orders.createdAt": { $gte: start, $lte: new Date(end.getTime() + 86400000) } }
                             ]
                         }
                     }
                 ]).exec()
                     .then((response) => {
-                        console.log(response, 'response---');
+                        console.log(response,'res');
                         resolve(response)
                     })
             })

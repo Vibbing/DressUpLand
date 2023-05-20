@@ -33,7 +33,17 @@ module.exports = {
         orderHelpers.postAddress(data, userId).then((response) => {
             res.send(response)
         })
-
+    },
+    
+    /* GET Edit Address Page */
+    getEditAddress:(req,res)=>{
+        let userId = req.session.user._id
+        let addressId = req.params.id
+        console.log(userId,'user');
+        console.log(addressId,'address');
+        orderHelpers.getEditAddress(addressId,userId).then((currentAddress)=>{
+            res.send(currentAddress)
+        })
     },
 
     /* GET Check Out Page */

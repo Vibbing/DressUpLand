@@ -27,104 +27,104 @@ module.exports = {
 
     totalCheckOutAmount: (userId) => {
         try {
-          return new Promise((resolve, reject) => {
-            cartModel.Cart.aggregate([
-              {
-                $match: {
-                  user: new ObjectId(userId)
-                }
-              },
-              {
-                $unwind: "$cartItems"
-              },
-              {
-                $lookup: {
-                  from: "products",
-                  localField: "cartItems.productId",
-                  foreignField: "_id",
-                  as: "carted"
-                }
-              },
-              {
-                $project: {
-                  item: "$cartItems.productId",
-                  quantity: "$cartItems.quantity",
-                  price: {
-                    $cond: {
-                      if: { $gt: [{ $arrayElemAt: ["$carted.discountedPrice", 0] }, 0] },
-                      then: { $arrayElemAt: ["$carted.discountedPrice", 0] },
-                      else: { $arrayElemAt: ["$carted.price", 0] }
+            return new Promise((resolve, reject) => {
+                cartModel.Cart.aggregate([
+                    {
+                        $match: {
+                            user: new ObjectId(userId)
+                        }
+                    },
+                    {
+                        $unwind: "$cartItems"
+                    },
+                    {
+                        $lookup: {
+                            from: "products",
+                            localField: "cartItems.productId",
+                            foreignField: "_id",
+                            as: "carted"
+                        }
+                    },
+                    {
+                        $project: {
+                            item: "$cartItems.productId",
+                            quantity: "$cartItems.quantity",
+                            price: {
+                                $cond: {
+                                    if: { $gt: [{ $arrayElemAt: ["$carted.discountedPrice", 0] }, 0] },
+                                    then: { $arrayElemAt: ["$carted.discountedPrice", 0] },
+                                    else: { $arrayElemAt: ["$carted.price", 0] }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            total: { $sum: { $multiply: ["$quantity", "$price"] } }
+                        }
                     }
-                  }
-                }
-              },
-              {
-                $group: {
-                  _id: null,
-                  total: { $sum: { $multiply: ["$quantity", "$price"] } }
-                }
-              }
-            ])
-            .then((total) => {
-              resolve(total[0]?.total)
+                ])
+                    .then((total) => {
+                        resolve(total[0]?.total)
+                    })
             })
-          })
         } catch (error) {
-          console.log(error.message);
+            console.log(error.message);
         }
-      },
-      
+    },
+
 
     //to get the sub total 
     getSubTotal: (userId) => {
         try {
-          return new Promise((resolve, reject) => {
-            cartModel.Cart.aggregate([
-              {
-                $match: {
-                  user: new ObjectId(userId)
-                }
-              },
-              {
-                $unwind: "$cartItems"
-              },
-              {
-                $lookup: {
-                  from: "products",
-                  localField: "cartItems.productId",
-                  foreignField: "_id",
-                  as: "carted"
-                }
-              },
-              {
-                $project: {
-                  item: "$cartItems.productId",
-                  quantity: "$cartItems.quantity",
-                  price: {
-                    $cond: {
-                      if: { $gt: [{ $arrayElemAt: ["$carted.discountedPrice", 0] }, 0] },
-                      then: { $arrayElemAt: ["$carted.discountedPrice", 0] },
-                      else: { $arrayElemAt: ["$carted.price", 0] }
+            return new Promise((resolve, reject) => {
+                cartModel.Cart.aggregate([
+                    {
+                        $match: {
+                            user: new ObjectId(userId)
+                        }
+                    },
+                    {
+                        $unwind: "$cartItems"
+                    },
+                    {
+                        $lookup: {
+                            from: "products",
+                            localField: "cartItems.productId",
+                            foreignField: "_id",
+                            as: "carted"
+                        }
+                    },
+                    {
+                        $project: {
+                            item: "$cartItems.productId",
+                            quantity: "$cartItems.quantity",
+                            price: {
+                                $cond: {
+                                    if: { $gt: [{ $arrayElemAt: ["$carted.discountedPrice", 0] }, 0] },
+                                    then: { $arrayElemAt: ["$carted.discountedPrice", 0] },
+                                    else: { $arrayElemAt: ["$carted.price", 0] }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        $project: {
+                            total: { $multiply: ["$quantity", "$price"] }
+                        }
                     }
-                  }
-                }
-              },
-              {
-                $project: {
-                  total: { $multiply: ["$quantity", "$price"] }
-                }
-              }
-            ])
-            .then((total) => {
-              const totals = total.map(obj => obj.total)
-              resolve({ total, totals })
+                ])
+                    .then((total) => {
+                        const totals = total.map(obj => obj.total)
+                        resolve({ total, totals })
+                    })
             })
-          })
         } catch (error) {
-          console.log(error.message);
+            console.log(error.message);
         }
-      },
-      
+    },
+
 
     /* GET Address Page */
     getAddress: (userId) => {
@@ -868,34 +868,67 @@ module.exports = {
     },
 
     //admin dashboard
-      // get order by date
+    // get order by date
 
-  getOrderByDate: () => {
-    return new Promise(async (resolve, reject) => {
-      const startDate = new Date();
-      await orderModel.Order
-        .find({ createdAt: { $gte: startDate } })
-        .then((response) => {
-          resolve(response);
+    getOrderByDate: () => {
+        return new Promise(async (resolve, reject) => {
+            const startDate = new Date();
+            await orderModel.Order
+                .find({ createdAt: { $gte: startDate } })
+                .then((response) => {
+                    resolve(response);
+                });
         });
-    });
-  },
+    },
 
     // get orders by category wise
 
-    getOrderByCategory:()=>
-    {
-      return new Promise(async (resolve, reject) => {
-        await orderModel.Order.aggregate([
-          { $unwind: "$orders"},
-        ]).then((response)=>
-        {
-          const productDetails = response.map(order => order.orders.productDetails);
-          resolve(productDetails)
-  
+    getOrderByCategory: () => {
+        return new Promise(async (resolve, reject) => {
+            await orderModel.Order.aggregate([
+                { $unwind: "$orders" },
+            ]).then((response) => {
+                const productDetails = response.map(order => order.orders.productDetails);
+                resolve(productDetails)
+
+            })
         })
-      })
     },
+
+    /* GET Edit Address Page */
+    getEditAddress: (addressId, userId) => {
+        return new Promise((resolve, reject) => {
+            addressModel.Address.aggregate([
+                {
+                    $match: {
+                        user: new ObjectId(userId)
+                    }
+                },
+                {
+                    $project: {
+                        address: {
+                            $filter: {
+                                input: "$Address",
+                                as: "item",
+                                cond: { $eq: ["$$item._id", new ObjectId(addressId)] }
+                            }
+                        }
+                    }
+                }
+            ])
+                .then(result => {
+                    if (result.length === 0) {
+                        resolve(null); // Address not found
+                    } else {
+                        resolve(result[0].address[0]); // Return the matched address
+                    }
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        });
+    }
+
 
 
 

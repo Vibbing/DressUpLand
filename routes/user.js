@@ -5,7 +5,7 @@ const cartController = require('../controllers/cartController')
 const orderController = require('../controllers/orderControllers')
 const auth = require('../middleware/auth');
 const adminController = require('../controllers/adminController');
-const {checkProductQty} = require('../middleware/productQtyCheck')
+const {checkProductQty,checkProductQtyCart} = require('../middleware/productQtyCheck')
 /* GET Home Page. */
 router.get('/',userController.getHomePage)
 
@@ -46,7 +46,7 @@ router.get('/cart-list',auth.userAuth, cartController.getCart)
 router.post('/add-to-cart/:id', checkProductQty,cartController.addToCart)
 
 /* POST Update cart quantity Page */
-router.patch('/change-product-quantity',auth.userAuth,cartController.updateQuantity)
+router.patch('/change-product-quantity',auth.userAuth,checkProductQtyCart,cartController.updateQuantity)
 
 /* Delete product from cart*/
 router.delete('/delete-product-cart',auth.userAuth,cartController.deleteProduct)
@@ -56,6 +56,9 @@ router.get('/get-profile',auth.userAuth,orderController.getAddress)
 
 /* POST Address Page */
 router.route('/add-address').post(auth.userAuth,orderController.postAddress)
+
+/* GET Edit Address Page */
+router.route('/edit-address/:id').get(orderController.getEditAddress)
 
 /* GET Check Out Page */
 router.get('/check-out',auth.userAuth,orderController.getCheckOut)

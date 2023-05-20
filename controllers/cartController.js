@@ -24,6 +24,7 @@ module.exports = {
     addToCart: (req, res) => {
         cartHelpers.addToCart(req.params.id, req.session.user._id)
             .then((response) => {
+                console.log(response,'res');
                 res.send(response)
             })
     },

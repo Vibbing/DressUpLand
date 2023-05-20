@@ -70,12 +70,13 @@
                   <td class="price" data-title="Price"><span>₹<%=item.carted.price%></span></td>
                   <% } %>
                   <td class="text-center" data-title="Stock">
-                    <div class="detail-qty border radius m-auto">
+                    <div class="detail-qty border radius m-auto d-flex justify-content-center">
                       <button class="qty-btn" onclick="changeQuantity('<%= item._id %>','<%=item.item%>','<%=user._id%>','<%=index%>',-1)"><i class="fi-rs-angle-small-down"></i></button>
                       <span id="qty-val-<%= item.item %>" class="qty-val"><%= item.quantity %></span>
                       <button class="qty-btn" onclick="changeQuantity('<%= item._id %>','<%=item.item%>','<%=user._id%>','<%=index%>',1)"><i class="fi-rs-angle-small-up"></i></button>
                     </div>
                   </td>
+                  
 
                   <td class="text-right" data-title="Cart">
                    <span id="subTotal-<%=item.item%>" class="subTotalVal">₹<%=subTotal.totals[index]%></span> 
@@ -258,6 +259,13 @@
             document.getElementById('subTotal').innerHTML = response.total
             document.getElementById('total').innerHTML = response.total
             // location.reload()
+          }else{
+            Swal.fire({
+        icon: 'warning',
+        title: response.message,
+        showConfirmButton: false,
+        timer : 4000
+      });
           }
         }
       })

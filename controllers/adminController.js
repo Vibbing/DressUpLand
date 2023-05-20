@@ -470,6 +470,7 @@ module.exports = {
 
     /* POST Sales Report Page. */
     postSalesReport: (req, res) => {
+  
         let admin = req.session.admin
         let details = []
         const getDate = (date) => {
@@ -481,11 +482,12 @@ module.exports = {
         }
 
         adminHelpers.postReport(req.body).then((orderData) => {
-            console.log(orderData, 'orderData');
+            console.log(orderData,'order');
             orderData.forEach((orders) => {
                 details.push(orders.orders)
             })
-
+            console.log(details,'details');
+  
             res.render("admin/salesReport", { layout: 'adminLayout', admin, details, getDate })
         })
 

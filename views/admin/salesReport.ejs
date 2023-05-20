@@ -15,16 +15,18 @@
     </div>
   
     <div style="margin-top: -5em;">
-      <form action="/admin/sales-report" method="POST" id="salesReport">
+      <form action="/admin/sales-report" method="POST" id="salesReport" >
   
         <div><input type="date" name="startdate" id="startdate" placeholder="Start Date" class="flatpickr"></div>
+        <small id="err1" class="text-danger "></small>
         <span id="date-error1" style="display: none; color: red;">Invalid Start Date</span>
-  
+        <br>
         <div><input type="date" name="enddate" id="enddate" placeholder="End Date" class="flatpickr"></div>
+        <small id="err2" class="text-danger" ></small>
         <span id="date-error2" style="display: none; color: red;">Invalid End Date</span>
         <br>
   
-        <button class="btn-sm btn-info" type="submit" id="submit-button">Submit</button>
+        <button class="btn-sm btn-info" type="button" onclick="validate()" id="submit-button">Submit</button>
   
       </form>
     </div>
@@ -74,6 +76,49 @@
   
   
   <script>
+    //validation for the form
+    function validate(){
+      console.log('validate() function called');
+      let startDate = document.getElementById('startdate')
+      let endDate = document.getElementById('enddate')
+
+      let startDateValue = startDate.value.trim()
+      let endDateValue = endDate.value.trim()
+
+      let err1 = document.getElementById('err1')
+      let err2 = document.getElementById('err2')
+
+      err1.innerText = ''
+      err2.innerText = ''
+
+      let flag = 1
+
+      if(startDateValue == ''){
+        err1.innerText = 'Start Date field is required'
+        flag = 2
+      }
+
+      if(endDateValue == ''){
+        err2.innerText = 'End Date field is required'
+        flag = 2
+      }
+
+      if(flag === 1){
+        document.getElementById('salesReport').submit()
+      }
+    }
+
+    // function submit(start,end){
+    //   $.ajax({
+    //     url : '/sales-report',
+    //     method : 'POST',
+    //     data : {
+    //       startDate : start,
+    //       endDate : end 
+    //     }
+    //   })
+    // }
+
 
 //date customisation 
 flatpickr(".flatpickr", {
@@ -98,7 +143,7 @@ flatpickr(".flatpickr", {
      let submitButton = document.getElementById('submit-button');
   
   // Disable submit button on page load
-  submitButton.disabled = true;
+  // submitButton.disabled = true;
   
   // Add event listeners to start date and end date inputs
   startDate.addEventListener("input", validateDates);
