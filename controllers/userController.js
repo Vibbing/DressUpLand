@@ -13,14 +13,17 @@ module.exports = {
 
     /* GET home page. */
     getHomePage: async (req, res) => {
-        var count = null
-        var wishlistCount = null
+        let count = null
+        let wishlistCount = null
+        let banner = null
         let user = req.session.user
         if (user) {
-            var count = await cartHelpers.getCartCount(user._id)
-            var wishlistCount = await wishListHelpers.getWishListCount(user._id)
+             count = await cartHelpers.getCartCount(user._id)
+             wishlistCount = await wishListHelpers.getWishListCount(user._id)
+             banner = await userHelper.getAllBanner() 
+             console.log(banner,'bannn');
         }
-        res.render('homePage', { layout: 'Layout', user, count, wishlistCount })
+        res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner })
     },
 
     /* GET SignUp Page. */

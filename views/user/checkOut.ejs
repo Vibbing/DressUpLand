@@ -4,7 +4,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-  
+
 
 </head>
 
@@ -71,13 +71,14 @@
                     </address>
                     <div class="d-flex mt-2">
                       <button type="button" class="btn btn-primary btn-small hover-up mx-1" onclick="editAddress('<%=item._id%>')">
+                        <input type="hidden" id="addressId" value="<%=item._id%>">
                         <i class="fi-rs-edit"></i>
                       </button>
-                      
+
                       <button type="button" class="btn btn-danger btn-small hover-up bg-danger mx-1" style="border-color: red;" onclick="removeAddress('<%=item._id%>')">
                         <i class="fi-rs-trash"></i>
                       </button>
-                      
+
                     </div>
 
                   </div>
@@ -188,11 +189,11 @@
                   </div>
                 </div>
                 <div class="form-group">
-                 
-                  <input   name="discountedAmount" id="total1"  value="<%=total%>" type="hidden" >
-                  <input   type="hidden" name="couponCode" id="codes" value="0">
-            
-              </div>
+
+                  <input name="discountedAmount" id="total1" value="<%=total%>" type="hidden">
+                  <input type="hidden" name="couponCode" id="codes" value="0">
+
+                </div>
               </div>
             </div>
             <button type="button" class="btn btn-fill-out btn-block mt-30" onclick="proceedToPayment()">Proceed to payment</button>
@@ -313,22 +314,22 @@
           <div class="mb-25">
             <h4>Change Billing Address</h4>
           </div>
-          <form style="width: 450px;">
+          <form style="width: 450px;" id="editAddressForm">
 
             <div class="form-group">
-              <input type="text"  name="fname" id="Fname" placeholder="First name *">
+              <input type="text" name="fname" id="Fname" placeholder="First name *">
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
-              <input type="text"  name="lname" id="Lname" placeholder="Last name *">
+              <input type="text" name="lname" id="Lname" placeholder="Last name *">
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
-              <input type="text" name="street" id="Street"  placeholder="Street*">
+              <input type="text" name="street" id="Street" placeholder="Street*">
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
-              <input type="text" name="appartment" id="Appartment"  placeholder="Appartment">
+              <input type="text" name="appartment" id="Appartment" placeholder="Appartment">
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
@@ -336,7 +337,7 @@
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
-              <input  type="text" name="state" id="State" placeholder="State / County *">
+              <input type="text" name="state" id="State" placeholder="State / County *">
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
@@ -344,16 +345,16 @@
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
-              <input  type="text" name="phone" id="Phone" placeholder="Phone *">
+              <input type="text" name="phone" id="Phone" placeholder="Phone *">
               <p id="err" class="text-danger"></p>
             </div>
             <div class="form-group">
-              <input  type="text" name="email" id="Email" placeholder="Email address *">
+              <input type="text" name="email" id="Email" placeholder="Email address *">
               <p id="err" class="text-danger"></p>
             </div>
             <div class="modal-footer">
               <button id="cancelBtn" type="button" class="btn btn-secondary">Cancel</button>
-              <button type="button" class="btn btn-primary">Save</button>
+              <button type="button" class="btn btn-primary" onclick="postEditAddress()">Save</button>
             </div>
 
           </form>
@@ -488,71 +489,95 @@
         email: email
       },
       success: (response) => {
-        location.reload()
+        swal({
+          title: 'Success',
+          text: 'Address addeed successfully',
+          icon: 'success',
+          timer: 4000,
+          buttons: false
+        }).then(() => {
+          location.reload()
+        });
       }
     })
   }
 
   //edit modal cancel button
   $('#cancelBtn').click(function() {
-  $('#editModal').modal('hide');
-});
-
-  //edit address
-  function editAddress(addressId, userId) {
-  $.ajax({
-    url: '/edit-address/' + addressId,
-    method: 'GET',
-    success: function(response) {
-      if (response) {
-        // Open the modal
-        $('#editModal').modal('show');
-      }
-
-      // Update the modal with the address data after the modal is shown
-      $('#editModal').on('shown.bs.modal', function () {
-
-        $('#Fname').val(response.fname);
-        $('#Lname').val(response.lname);
-        $('#Street').val(response.street);
-        $('#Appartment').val(response.appartment);
-        $('#City').val(response.city);
-        $('#State').val(response.state);
-        $('#Zipcode').val(response.zipcode);
-        $('#Phone').val(response.phone);
-        $('#Email').val(response.email);
-      });
-    },
-    error: function() {
-      console.log('Error occurred while retrieving the address data.');
-    }
+    $('#editModal').modal('hide');
   });
-}
 
+  let currentAddressId; // Declare a variable to store the current addressId
 
+  function editAddress(addressId, userId) {
+    currentAddressId = addressId; // Store the current addressId in the variable
+    $.ajax({
+      url: '/edit-address/' + addressId,
+      method: 'GET',
+      success: function(response) {
+        if (response) {
+          // Open the modal
+          $('#editModal').modal('show');
 
+          // Update the modal with the address data after the modal is shown
+          $('#editModal').on('shown.bs.modal', function() {
+            $('#Fname').val(response.fname);
+            $('#Lname').val(response.lname);
+            $('#Street').val(response.street);
+            $('#Appartment').val(response.appartment);
+            $('#City').val(response.city);
+            $('#State').val(response.state);
+            $('#Zipcode').val(response.zipcode);
+            $('#Phone').val(response.phone);
+            $('#Email').val(response.email);
+          });
+        }
+      },
+      error: function() {
+        console.log('Error occurred while retrieving the address data.');
+      }
+    });
+  }
 
   // Add the code snippet here
-  $('#editModal').on('shown.bs.modal', function () {
+  $('#editModal').on('shown.bs.modal', function() {
     $('#editForm input:first').focus();
   });
 
-
-
-
-  //edit address
-
-  function eeditAddress(userId) {
+  function postEditAddress() {
     $.ajax({
-      url: '/edit-address' + userId,
-      method: 'PUT',
-    })
+      url: '/edit-address/' + currentAddressId, // Use the current addressId from the variable
+      method: 'PATCH',
+      data: $('#editAddressForm').serialize(),
+      success: (response) => {
+        if (response) {
+          location.reload();
+          swal({
+            title: 'Success',
+            text: 'Address updated successfully',
+            icon: 'success',
+            timer: 4000,
+            buttons: false
+          });
+        } else {
+          swal({
+            title: 'Error',
+            text: 'Error occurred while updating the address',
+            icon: 'error',
+            timer: 4000,
+            buttons: false
+          });
+        }
+      }
+    });
   }
+
+
 
 
   // remove address
 
-  function removeAddress(userId) {
+  function removeAddress(addressId) {
     Swal.fire({
       title: 'Are you sure you want to remove this address?',
       icon: 'warning',
@@ -564,8 +589,19 @@
     }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
-          url: '/delete-address',
-          method: 'DELETE'
+          url: '/delete-address/' + addressId,
+          method: 'DELETE',
+          success: (response) => {
+            swal({
+              title: 'Success',
+              text: 'Address deleted successfully',
+              icon: 'success',
+              timer: 4000,
+              buttons: false
+            }).then(() => {
+              location.reload()
+            });
+          }
         })
       }
     })
@@ -573,51 +609,51 @@
 
 
   function proceedToPayment() {
-  var selectedOption = $('input[name="payment_option"]:checked').val();
-  let cartId = $('#cartId').val()
-  $.ajax({
-    url: "/check-out",
-    method: 'POST',
-    data: $('#checkOut-form').serialize(),
-    success: (response) => {
-      console.log(response,'+++++=========== ');
-      if (response.error) {
-        console.log(response,'error--------------------------------');
+    var selectedOption = $('input[name="payment_option"]:checked').val();
+    let cartId = $('#cartId').val()
+    $.ajax({
+      url: "/check-out",
+      method: 'POST',
+      data: $('#checkOut-form').serialize(),
+      success: (response) => {
+        console.log(response, '+++++=========== ');
+        if (response.error) {
+          console.log(response, 'error--------------------------------');
 
-        console.log(response.error.message,'---------------');
-        Swal.fire({
-          title: 'Error!',
-          text: response.error,
-          icon: 'error',
-          timer: 5000
-        })
-      } else if (response.codStatus == true) {
-        console.log(response,'status');
-        Swal.fire({
-          title: 'Order Placed!',
-          text: 'Your order has been placed successfully.',
-          icon: 'success',
-          timer: 5000
-        }).then(() => {
-          location.href = '/'
-        })
-      } else {
-        try {
-          razorpay(response)
-          console.log(response, '1');
-          console.log(response.amount, '2');
-        } catch (error) {
+          console.log(response.error.message, '---------------');
           Swal.fire({
             title: 'Error!',
-            text: error.message,
+            text: response.error,
             icon: 'error',
             timer: 5000
           })
+        } else if (response.codStatus == true) {
+          console.log(response, 'status');
+          Swal.fire({
+            title: 'Order Placed!',
+            text: 'Your order has been placed successfully.',
+            icon: 'success',
+            timer: 5000
+          }).then(() => {
+            location.href = '/'
+          })
+        } else {
+          try {
+            razorpay(response)
+            console.log(response, '1');
+            console.log(response.amount, '2');
+          } catch (error) {
+            Swal.fire({
+              title: 'Error!',
+              text: error.message,
+              icon: 'error',
+              timer: 5000
+            })
+          }
         }
       }
-    }
-  })
-}
+    })
+  }
 
 
 
@@ -694,7 +730,7 @@
             url: '/apply-coupon/' + couponCode,
             method: 'GET',
             success: (response) => {
-              console.log(response,'---');
+              console.log(response, '---');
               if (response.status == true) {
                 document.getElementById('couponErr').style.color = '#19ff11'
                 document.getElementById('couponErr').innerText = "Coupon Applied SuccessFully"

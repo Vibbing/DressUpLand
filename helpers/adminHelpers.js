@@ -339,12 +339,15 @@ module.exports = {
 
     
   addBanner: (texts, Image) => {
+    console.log(texts,'textt');
 
     return new Promise(async (resolve, reject) => {
 
       let banner = bannerModel.Banner({
         title: texts.title,
-        description: texts.description,
+        mainDescription: texts.mainDescription,
+        subDescription: texts.subDescription,
+        categoryOffer: texts.categoryOffer,
         image: Image
 
       })

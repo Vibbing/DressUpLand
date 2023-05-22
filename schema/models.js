@@ -206,7 +206,13 @@ const bannerSchema = new mongoose.Schema({
     image: {
         type: String
     },
-    description: {
+    mainDescription: {
+        type: String
+    },
+    subDescription: {
+        type: String
+    },
+    categoryOffer: {
         type: String
     },
     createdAt: {

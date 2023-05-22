@@ -135,6 +135,44 @@ module.exports = {
 
         })
     },
+    /* PATCH Address Page */
+    patchEditAddress: (userId, addressId, UserData) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await addressModel.Address
+                    .updateOne(
+                        {
+                            user: new ObjectId(userId),
+                            "Address._id": new ObjectId(addressId),
+                        },
+                        {
+                            $set: {
+                                "Address.$": UserData,
+                            },
+                        }
+                    )
+                    .then((response) => {
+                        resolve(response);
+                    });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    },
+
+    /* DELETE  Address Page */
+    deleteAddress:(userId,addressId)=>{
+        return new Promise((resolve,reject)=>{
+            addressModel.Address.updateOne(
+                { user: new ObjectId(userId) },
+                { $pull: { Address: { _id: new ObjectId(addressId) } } }
+              ).then((response)=>{
+                resolve(response)
+            })
+        })
+
+    },
+
 
     /* POST Address Page */
     postAddress: (data, userId) => {

@@ -39,10 +39,27 @@ module.exports = {
     getEditAddress:(req,res)=>{
         let userId = req.session.user._id
         let addressId = req.params.id
-        console.log(userId,'user');
-        console.log(addressId,'address');
         orderHelpers.getEditAddress(addressId,userId).then((currentAddress)=>{
             res.send(currentAddress)
+        })
+    },
+
+    /* PATCH Edit Address Page */
+    patchEditAddress:(req,res)=>{
+        let addressId = req.params.id
+        let userId = req.session.user._id
+        let userData = req.body
+        orderHelpers.patchEditAddress(userId,addressId,userData).then((response)=>{
+            res.send(response)
+        })
+    },
+
+    /* DELETE  Address Page */
+    deleteAddress:(req,res)=>{
+        let userId = req.session.user._id
+        let addressId = req.params.id
+        orderHelpers.deleteAddress(userId,addressId).then((response)=>{
+            res.send(response)
         })
     },
 

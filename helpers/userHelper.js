@@ -1,5 +1,7 @@
+
 const userModel = require('../schema/models')
 const productModel = require('../schema/models')
+const bannerModel = require('../schema/models')
 const bcrypt = require('bcrypt')
 
 module.exports = {
@@ -156,8 +158,7 @@ module.exports = {
         const filter = query?.filter
         const page = parseInt(query?.page) || 1
         const perPage = 10
-console.log(filter,'----');
-        // console.log(search, sort, filter, page, perPage)
+
 
             return new Promise( async(resolve, reject) =>{
 
@@ -236,7 +237,18 @@ console.log(filter,'----');
 
             })    
 
-    }
+    },
+
+    //getting all banners
+    getAllBanner:()=>{
+        return new Promise((resolve,reject)=>{
+            bannerModel.Banner.find().then((response)=>{
+                resolve(response)
+            }).catch(error =>{
+                resolve(error)
+            })
+        })
+    } 
 
 }
 

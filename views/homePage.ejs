@@ -1,3 +1,5 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
 <!-- Modal -->
 <!-- <div class="modal fade custom-modal" id="onloadModal" tabindex="-1" aria-labelledby="onloadModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -327,72 +329,34 @@
 <main class="main">
   <section class="home-slider position-relative pt-50">
     <div class="hero-slider-1 dot-style-1 dot-style-1-position-1">
+      <% banner.forEach((banner, index) => { %>
       <div class="single-hero-slider single-animation-wrap">
         <div class="container">
-          <div class="row align-items-center slider-animated-1">
+          <div class="row align-items-center">
             <div class="col-lg-5 col-md-6">
               <div class="hero-slider-content-2">
-                <h4 class="animated">Trade-in offer</h4>
-                <h2 class="animated fw-900">Supper value deals</h2>
-                <h1 class="animated fw-900 text-brand">On all products</h1>
-                <p class="animated">Save more with coupons & up to 70% off</p>
-                <a class="animated btn btn-brush btn-brush-3" href="shop-product-right.html"> Shop
-                  Now </a>
+                <h4 class="animated title"><%= banner.title %></h4>
+                <h2 class="animated fw-900 description"><%= banner.mainDescription %></h2>
+                <h1 class="animated fw-900 text-brand description"><%= banner.subDescription %></h1>
+                <p class="animated description"><%= banner.categoryOffer %></p>
+                <a class="animated btn btn-brush btn-brush-3" href="shop-product-right.html">Shop Now</a>
               </div>
             </div>
             <div class="col-lg-7 col-md-6">
-              <div class="single-slider-img single-slider-img-1">
-                <img class="animated slider-1-1" src="frontEnd/imgs/slider/slider-1.png" alt="">
+              <div class="single-slider-img single-slider-img-<%= index + 1 %>">
+                <img class="animated image" src="/productImages/<%= banner.image %>" alt="">
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="single-hero-slider single-animation-wrap">
-        <div class="container">
-          <div class="row align-items-center slider-animated-1">
-            <div class="col-lg-5 col-md-6">
-              <div class="hero-slider-content-2">
-                <h4 class="animated">Hot promotions</h4>
-                <h2 class="animated fw-900">Fashion Trending</h2>
-                <h1 class="animated fw-900 text-7">Great Collection</h1>
-                <p class="animated">Save more with coupons & up to 20% off</p>
-                <a class="animated btn btn-brush btn-brush-2" href="shop-product-right.html">
-                  Discover Now </a>
-              </div>
-            </div>
-            <div class="col-lg-7 col-md-6">
-              <div class="single-slider-img single-slider-img-1">
-                <img class="animated slider-1-2" src="frontEnd/imgs/slider/slider-2.png" alt="">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="single-hero-slider single-animation-wrap">
-        <div class="container">
-          <div class="row align-items-center slider-animated-1">
-            <div class="col-lg-5 col-md-6">
-              <div class="hero-slider-content-2">
-                <h4 class="animated">Upcoming Offer</h4>
-                <h2 class="animated fw-900">Big Deals From</h2>
-                <h1 class="animated fw-900 text-8">Manufacturer</h1>
-                <p class="animated">Clothing, Shoes, Bags, Wallets...</p>
-                <a class="animated btn btn-brush btn-brush-1" href="shop-product-right.html"> Shop
-                  Now </a>
-              </div>
-            </div>
-            <div class="col-lg-7 col-md-6">
-              <div class="single-slider-img single-slider-img-1">
-                <img class="animated slider-1-3" src="frontEnd/imgs/slider/slider-3.png" alt="">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <% }) %>
     </div>
     <div class="slider-arrow hero-slider-1-arrow"></div>
   </section>
+  
+
+  
   <section class="featured section-padding position-relative">
     <div class="container">
       <div class="row">
@@ -2682,3 +2646,76 @@
     </div>
   </div>
 </div> -->
+
+<script>
+  // Wait for the DOM to be loaded
+  document.addEventListener('DOMContentLoaded', function () {
+    // Select the elements to be animated
+    const titles = document.querySelectorAll('.title');
+    const descriptions = document.querySelectorAll('.description');
+    const images = document.querySelectorAll('.image');
+    const shopButtons = document.querySelectorAll('.btn-brush');
+
+    // Create animations for each element
+    const titleAnimation = anime({
+      targets: titles,
+      opacity: [0, 1],
+      translateY: [100, 0],
+      duration: 1500, // Longer duration for smoother transition
+      delay: anime.stagger(300), // Increased delay for smoother transition
+    });
+
+    const descriptionAnimation = anime({
+      targets: descriptions,
+      opacity: [0, 1],
+      translateY: [100, 0],
+      duration: 1500, // Longer duration for smoother transition
+      delay: anime.stagger(300), // Increased delay for smoother transition
+    });
+
+    const imageAnimation = anime({
+      targets: images,
+      opacity: [0, 1],
+      translateX: [-100, 0],
+      duration: 8000, // Longer duration for smoother transition
+      delay: anime.stagger(300), // Increased delay for smoother transition
+    });
+
+    const shopButtonAnimation = anime({
+      targets: shopButtons,
+      opacity: [0, 1],
+      translateY: [100, 0],
+      duration: 1500, // Duration for the shop button animation
+      delay: anime.stagger(300), // Increased delay for smoother transition
+    });
+
+    // Stop the default Slick animation
+    $('.hero-slider-1').slick('slickPause');
+
+    // Function to change the active banner
+    function changeBanner() {
+      $('.hero-slider-1').slick('slickNext');
+      setTimeout(() => {
+        titleAnimation.restart();
+        descriptionAnimation.restart();
+        imageAnimation.restart();
+        shopButtonAnimation.restart();
+      }, 500); // Delay before restarting the animations (in milliseconds)
+    }
+
+    // Play the animations when the slider changes
+    $('.hero-slider-1').on('afterChange', function () {
+      titleAnimation.restart();
+      descriptionAnimation.restart();
+      imageAnimation.restart();
+      shopButtonAnimation.restart();
+    });
+
+    // Automatically change banner after a specific time (in milliseconds)
+    const intervalTime = 5000; // Change banner every 5 seconds
+    setInterval(changeBanner, intervalTime);
+  });
+</script>
+
+
+
