@@ -2,6 +2,7 @@
 const userModel = require('../schema/models')
 const productModel = require('../schema/models')
 const bannerModel = require('../schema/models')
+const couponModel = require('../schema/models')
 const bcrypt = require('bcrypt')
 
 module.exports = {
@@ -248,7 +249,18 @@ module.exports = {
                 resolve(error)
             })
         })
-    } 
+    },
+
+    //getting all coupons
+    getAllCoupons:()=>{
+        return new Promise((resolve,reject)=>{
+            couponModel.Coupon.find().then((response)=>{
+                resolve(response)
+            }).catch(error=>{
+                resolve(error)
+            })
+        })
+    }
 
 }
 

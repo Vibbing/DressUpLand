@@ -1,5 +1,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+
 <!-- Modal -->
 <!-- <div class="modal fade custom-modal" id="onloadModal" tabindex="-1" aria-labelledby="onloadModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -330,6 +338,7 @@
   <section class="home-slider position-relative pt-50">
     <div class="hero-slider-1 dot-style-1 dot-style-1-position-1">
       <% banner.forEach((banner, index) => { %>
+        <% if(banner.categoryOffer !== 'null'){ %>
       <div class="single-hero-slider single-animation-wrap">
         <div class="container">
           <div class="row align-items-center">
@@ -339,7 +348,7 @@
                 <h2 class="animated fw-900 description"><%= banner.mainDescription %></h2>
                 <h1 class="animated fw-900 text-brand description"><%= banner.subDescription %></h1>
                 <p class="animated description"><%= banner.categoryOffer %></p>
-                <a class="animated btn btn-brush btn-brush-3" href="shop-product-right.html">Shop Now</a>
+                <a class="animated btn btn-brush btn-brush-3" href="<%=banner.link%>">Shop Now</a>
               </div>
             </div>
             <div class="col-lg-7 col-md-6">
@@ -350,13 +359,14 @@
           </div>
         </div>
       </div>
+      <% } %> 
       <% }) %>
     </div>
     <div class="slider-arrow hero-slider-1-arrow"></div>
   </section>
-  
 
-  
+
+
   <section class="featured section-padding position-relative">
     <div class="container">
       <div class="row">
@@ -1673,48 +1683,58 @@
       </div>
     </div>
   </section>
-  <section class="deals section-padding">
+  <section class="mb-50">
     <div class="container">
       <div class="row">
-        <div class="col-lg-6 deal-co">
-          <div class="deal wow fadeIn animated mb-md-4 mb-sm-4 mb-lg-0" style="background-image: url('frontEnd/imgs/banner/menu-banner-7.jpg');">
-            <div class="deal-top">
-              <h2 class="text-brand">Deal of the Day</h2>
-              <h5>Limited quantities.</h5>
+        <div class="col-12">
+          <div id="myCarousel" class="carousel slide" data-ride="carousel">
+            <!-- Indicators -->
+            <ol class="carousel-indicators">
+              <% coupon.forEach((_, index) => { %>
+                <% if (new Date(coupon[index].validity) > new Date()) { %>
+                <li data-target="#myCarousel" data-slide-to="<%= index %>" <% if (index === 0) { %>class="active"<% } %>></li>
+                <% } %>
+                <% }) %>
+            </ol>
+  
+            <!-- Slides -->
+            <div class="carousel-inner">
+              <% coupon.forEach((coupon, index) => { %>
+                <% if (new Date(coupon.validity) > new Date()) { %>
+                <div class="carousel-item <% if (index === 0) { %>active<% } %>">
+                  <div class="carousel-image" style="background-image: url('frontEnd/imgs/theme/coupon-background.jpg');"></div>
+                  <div class="carousel-caption">
+                    <div class="carousel-text">
+                      <h5 class="text-grey-4 mb-10" style="text-align: left;"><%= coupon.description %></h5>
+                      <h2 class="fw-600 mb-10" style="text-align: left;">Coupon Code : <span class="coupon-code-text"><%= coupon.couponCode %></span> <span class="copy-tag"><i class="fas fa-copy"></i></span></h2>
+                      <h3 class="coupon-code mb-10" style="text-align: left;">Minimum Purchase Amount : ₹<%= coupon.minPurchase %></h3>
+                      <div class="deals-countdown mt-60" data-countdown="<%= coupon.validity %>"></div>
+                    </div>
+                  </div>
+                </div>
+                <% } %>
+                <% }) %>
             </div>
-            <div class="deal-content">
-              <h6 class="product-title"><a href="shop-product-right.html">Summer Collection New Morden
-                  Design</a></h6>
-              <div class="product-price"><span class="new-price">$139.00</span><span class="old-price">$160.99</span></div>
-            </div>
-            <div class="deal-bottom">
-              <p>Hurry Up! Offer End In:</p>
-              <div class="deals-countdown" data-countdown="2025/03/25 00:00:00"></div>
-              <a href="shop-grid-right.html" class="btn hover-up">Shop Now <i class="fi-rs-arrow-right"></i></a>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-6 deal-co">
-          <div class="deal wow fadeIn animated" style="background-image: url('frontEnd/imgs/banner/menu-banner-8.jpg');">
-            <div class="deal-top">
-              <h2 class="text-brand">Men Clothing</h2>
-              <h5>Shirt & Bag</h5>
-            </div>
-            <div class="deal-content">
-              <h6 class="product-title"><a href="shop-product-right.html">Try something new on
-                  vacation</a></h6>
-              <div class="product-price"><span class="new-price">$178.00</span><span class="old-price">$256.99</span></div>
-            </div>
-            <div class="deal-bottom">
-              <p>Hurry Up! Offer End In:</p>
-              <div class="deals-countdown" data-countdown="2026/03/25 00:00:00"></div>
-              <a href="shop-grid-right.html" class="btn hover-up">Shop Now <i class="fi-rs-arrow-right"></i></a>
-            </div>
+  
+            <!-- Controls -->
+            <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Next</span>
+            </a>
           </div>
         </div>
       </div>
     </div>
   </section>
+  
+  
+  
+  
+  
   <section class="section-padding">
     <div class="container">
       <h3 class="section-title mb-20 wow fadeIn animated"><span>Featured</span> Brands</h3>
@@ -2649,7 +2669,7 @@
 
 <script>
   // Wait for the DOM to be loaded
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     // Select the elements to be animated
     const titles = document.querySelectorAll('.title');
     const descriptions = document.querySelectorAll('.description');
@@ -2704,7 +2724,7 @@
     }
 
     // Play the animations when the slider changes
-    $('.hero-slider-1').on('afterChange', function () {
+    $('.hero-slider-1').on('afterChange', function() {
       titleAnimation.restart();
       descriptionAnimation.restart();
       imageAnimation.restart();
@@ -2717,5 +2737,125 @@
   });
 </script>
 
+<script>
+  // Initialize countdown timers
+  const countdownElements = document.querySelectorAll('.deals-countdown');
+  countdownElements.forEach((element) => {
+    const countdownValue = element.getAttribute('data-countdown');
+    startCountdown(element, countdownValue);
+  });
+
+  // Function to start the countdown timer
+  function startCountdown(element, countdownValue) {
+    const countdownDate = new Date(countdownValue).getTime();
+    const countdownUpdate = setInterval(updateCountdown, 1000);
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = countdownDate - now;
+
+      // Calculations for days, hours, minutes, and seconds
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Update the countdown element
+      element.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+      // Check if the countdown has expired
+      if (distance < 0) {
+        clearInterval(countdownUpdate);
+        element.innerHTML = 'Expired';
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+  const copyTags = document.querySelectorAll('.copy-tag');
+  copyTags.forEach(function(copyTag) {
+    copyTag.addEventListener('click', function() {
+      const couponCodeText = this.parentNode.querySelector('.coupon-code-text');
+      copyToClipboard(couponCodeText.innerText);
+      showCopiedNotification();
+    });
+  });
+
+  function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = 0;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+  }
+
+  function showCopiedNotification() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Coupon code copied!',
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
+});
+
+</script>
 
 
+<style>
+  .carousel-image {
+    width: 100%;
+    height: 30vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .carousel-caption {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    padding: 10px;
+    color: #fff;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .carousel-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .carousel-text h5,
+  .carousel-text h2,
+  .carousel-text h3,
+  .carousel-text h4,
+  .carousel-text p {
+    margin: 0;
+    text-align: left;
+  }
+
+  .coupon-code {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .deals-countdown {
+    position: absolute;
+    top: 50px;
+    right: 0; /* Update this to 0 to align the timer to the right end */
+    font-size: 28px;
+    font-weight: bold;
+    text-align: right;
+  }
+</style>

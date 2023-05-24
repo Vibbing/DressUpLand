@@ -21,9 +21,9 @@ module.exports = {
              count = await cartHelpers.getCartCount(user._id)
              wishlistCount = await wishListHelpers.getWishListCount(user._id)
              banner = await userHelper.getAllBanner() 
-             console.log(banner,'bannn');
+             coupon = await userHelper.getAllCoupons()
         }
-        res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner })
+        res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner,coupon })
     },
 
     /* GET SignUp Page. */

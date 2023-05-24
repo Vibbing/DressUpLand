@@ -1,4 +1,3 @@
-
 <div class="container mb-150 ml-180 mt-20">
   <section class="">
     <div class="col-md-8 box ">
@@ -11,7 +10,6 @@
               <input type="text" name="title" class="form-control" id="title" />
               <small id="error1" class="text-danger"></small>
               <br />
-
               <label for="">Main Description</label>
               <input type="text" name="mainDescription" class="form-control" id="mainDescription" />
               <small id="error2" class="text-danger"></small>
@@ -24,11 +22,14 @@
               <input type="text" name="categoryOffer" class="form-control" id="categoryOffer" />
               <small id="error4" class="text-danger"></small>
               <br />
-
+              <label for="">Link</label>
+              <input type="text" name="link" class="form-control" id="link" />
+              <small id="error5" class="text-danger"></small>
+              <br>
               <label for="">Image</label>
               <img class="w-25 h-25" src="/imgs/theme/upload.svg" id="imgView" alt="">
               <input type="file" name="image" class="form-control" required onchange="viewImage(event)" accept=".jpg, .jpeg, .png, .avif" />
-              <small id="error5" class="text-danger"></small>
+              <small id="error6" class="text-danger"></small>
               <button type="button" class="btn btn-info text-white text-center mt-4" onclick="validate()">
                 Submit
               </button>
@@ -53,28 +54,32 @@
     const title = document.getElementById('title')
     const mainDescription = document.getElementById('mainDescription')
     const subDescription = document.getElementById('subDescription')
-    const categoryOffer = document.getElementById('categoryOffer')
-    const image = document.getElementById("imgView");
+    // const categoryOffer = document.getElementById('categoryOffer')
+    const link = document.getElementById('link')
+    const image = document.getElementById('imgView')
 
 
     const titleValue = title.value.trim()
     const mainDescriptionValue = mainDescription.value.trim()
     const subDescriptionValue = subDescription.value.trim()
-    const categoryOfferValue = categoryOffer.value.trim()
+    // const categoryOfferValue = categoryOffer.value.trim()
+    const linkValue = link.value.trim()
 
 
     let error1 = document.getElementById('error1')
     let error2 = document.getElementById('error2')
     let error3 = document.getElementById("error3")
-    let error4 = document.getElementById("error4")
+    // let error4 = document.getElementById("error4")
     let error5 = document.getElementById("error5")
-    
+    let error6 = document.getElementById("error6")
+
 
     error1.innerText = ''
     error2.innerText = ''
     error3.innerText = ''
-    error4.innerText = ''
+    // error4.innerText = ''
     error5.innerText = ''
+    error6.innerText = ''
 
 
     let flag = 1
@@ -92,14 +97,17 @@
       error3.innerText = "Sub Description is required"
       flag = 2
     }
-    if (categoryOfferValue == '') {
-      error4.innerText = "Category Offer is required"
+    // if (categoryOfferValue == '') {
+    //   error4.innerText = "Category Offer is required"
+    //   flag = 2
+    // }
+    if(linkValue == ''){
+      error5.innerText = "Link is required"
       flag = 2
     }
-
     const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.avif|\.webp)$/i;
     if (!allowedExtensions.exec(selectedFile.name)) {
-      error5.innerText = "Please select a valid image format.";
+      error6.innerText = "Please select a valid image format.";
       flag = 2;
     }
 

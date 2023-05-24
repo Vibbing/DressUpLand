@@ -213,6 +213,10 @@ const bannerSchema = new mongoose.Schema({
         type: String
     },
     categoryOffer: {
+        type: String,
+        default: null
+    },
+    link: {
         type: String
     },
     createdAt: {

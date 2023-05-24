@@ -8,7 +8,7 @@ const adminController = require('../controllers/adminController');
 const {checkProductQty,checkProductQtyCart} = require('../middleware/productQtyCheck');
 const orderControllers = require('../controllers/orderControllers');
 /* GET Home Page. */
-router.get('/',userController.getHomePage)
+router.get('/',auth.userAuth,userController.getHomePage)
 
 /* GET SignUp Page. */
 router.get('/signup',userController.getSignup)

@@ -347,7 +347,8 @@ module.exports = {
         title: texts.title,
         mainDescription: texts.mainDescription,
         subDescription: texts.subDescription,
-        categoryOffer: texts.categoryOffer,
+        // categoryOffer: texts.categoryOffer,
+        link : texts.link,
         image: Image
 
       })
