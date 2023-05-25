@@ -10,6 +10,12 @@ const orderControllers = require('../controllers/orderControllers');
 /* GET Home Page. */
 router.get('/',auth.userAuth,userController.getHomePage)
 
+/* GET About us */
+router.get('/about-us',userController.getAboutUs)
+
+/* GET & POST Contact us */
+router.route('/contact-us').get(userController.getContactUs).post(userController.postContactUs)
+
 /* GET SignUp Page. */
 router.get('/signup',userController.getSignup)
 

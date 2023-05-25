@@ -1,5 +1,6 @@
 const express = require('express')
 const session = require('express-session')
+const nodemailer = require('nodemailer')
 const userHelper = require('../helpers/userHelper')
 const cartHelpers = require('../helpers/cartHelpers')
 const orderHelpers = require('../helpers/orderHelpers')
@@ -7,6 +8,9 @@ const wishListHelpers = require('../helpers/wishlistHelpers')
 const userModel = require('../schema/models')
 const { sendOtpApi, otpVerify } = require('../api/twilio')
 const couponHelpers = require('../helpers/couponHelpers')
+const adminMail = process.env.admin_email
+const userMail = process.env.user_email
+const userPassword = process.env.user_password
 
 
 module.exports = {
@@ -22,8 +26,10 @@ module.exports = {
             wishlistCount = await wishListHelpers.getWishListCount(user._id)
             banner = await userHelper.getAllBanner()
             coupon = await userHelper.getAllCoupons()
+            product = await userHelper.getAllProductsForHome()
+            console.log(product,'prodcut');
         }
-        res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner, coupon })
+        res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner, coupon, product })
     },
 
     /* GET SignUp Page. */
@@ -142,7 +148,7 @@ module.exports = {
             } else {
                 let currentPage = 1
                 const { product, totalPages } = await userHelper.getAllProducts(page, perPage);
-                if (product.length != 0)
+                if (product?.length != 0)
                     req.session.noProductFound = false
                 res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, totalPages, currentPage, productResult: req.session.noProduct })
                 req.session.noProductFound = false
@@ -232,5 +238,51 @@ module.exports = {
         couponHelpers.applyCoupon(couponCode, total).then((response) => {
             res.send(response)
         })
+    },
+    /* GET About us */
+    getAboutUs: (req, res) => {
+        res.render('user/aboutUs', { layout: 'Layout' })
+    },
+
+    /* GET Contact us */
+    getContactUs: (req, res) => {
+        res.render('user/contactUs', { layout: 'Layout' })
+    },
+
+    /* POST Contact us */
+    postContactUs: (req, res) => {
+        try {
+            const { name, email, message } = req.body;
+
+            // Create the email content
+            const mailOptions = {
+                from: email,
+                to: adminMail,
+                subject: 'New Contact Form Submission',
+                text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+            }
+
+            // Create a transporter with your email service provider's SMTP settings
+            const transporter = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: userMail,
+                    pass: userPassword
+                }
+            });
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                    res.status(500).send('Failed to send email.');
+                } else {
+                    console.log('Email sent:', info.response);
+                    res.send({ status: true });
+                }
+            });
+        } catch (error) {
+            console.log(error, 'error');
+        }
     }
+
 }

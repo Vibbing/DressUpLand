@@ -4,7 +4,7 @@
 
 <!-- Mirrored from wp.alithemes.com/html/evara/evara-//frontEnd/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:20:36 GMT -->
 
-<head> 
+<head>
   <meta charset="utf-8">
   <title>𝖂𝖊𝖑𝖈𝖔𝖒𝖊 𝖙𝖔</title>
   <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -20,22 +20,38 @@
   <link rel="stylesheet" href="/frontEnd/css/main.css">
 
 
-  <script  src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	<script  src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
-  <script  src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
 
-  <script  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script  src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
   <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
-  <script  src="https://kit.fontawesome.com/bc3d771fc0.js" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/bc3d771fc0.js" crossorigin="anonymous"></script>
 </head>
 
 
-</head>
+
 
 <body>
   <%- include('./partials/userHeader') %>
+
+  <div id="preloader-active">
+    <div class="preloader d-flex align-items-center justify-content-center">
+      <div class="preloader-inner position-relative">
+        <div class="text-center">
+          <h5 class="mb-10">Now Loading</h5>
+          <div class="loader">
+            <div class="bar bar1"></div>
+            <div class="bar bar2"></div>
+            <div class="bar bar3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <%- body %>
   <%- include('./partials/userFooter') %>
 

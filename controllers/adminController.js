@@ -90,6 +90,7 @@ module.exports = {
         });
     },
 
+
     /* GET Login Page. */
     getLogin: (req, res) => {
         res.render('admin/login', { layout: 'adminLayout' })
@@ -361,7 +362,6 @@ module.exports = {
         adminHelpers.getUserList(userId).then((user) => {
             console.log(user, 'user');
             orderHelpers.getOrders(userId).then((order) => {
-                console.log(order.orders[0].shippingAddress[0].item.fname, 'order');
                 res.render('admin/orderList', { layout: 'adminLayout', user, userId, admin, order })
             })
         })
