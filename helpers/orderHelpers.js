@@ -687,15 +687,40 @@ module.exports = {
     //to get all orders for admin
     getAllOrders: () => {
         try {
-            return new Promise((resolve, reject) => {
-                orderModel.Order.find().then((order) => {
-                    resolve(order)
-                })
-            })
+          return new Promise((resolve, reject) => {
+            orderModel.Order.find().then((orders) => {
+              let totalOrders = 0;
+              orders.forEach((order) => {
+                totalOrders += order.orders.length;
+              });
+              resolve(totalOrders);
+            });
+          });
         } catch (error) {
-            console.log(error.message);
+          console.log(error.message);
         }
-    },
+      },
+
+      getAllOrdersSum: () => {
+        try {
+          return new Promise((resolve, reject) => {
+            orderModel.Order.find().then((orders) => {
+              let totalSum = 0;
+              orders.forEach((order) => {
+                order.orders.forEach((item) => {
+                  totalSum += item.totalPrice;
+                });
+              });
+              resolve(totalSum);
+            });
+          });
+        } catch (error) {
+          console.log(error.message);
+        }
+      },
+      
+
+      
 
 
     //to get the current order
@@ -911,13 +936,15 @@ module.exports = {
     getOrderByDate: () => {
         return new Promise(async (resolve, reject) => {
             const startDate = new Date();
-            await orderModel.Order
-                .find({ createdAt: { $gte: startDate } })
-                .then((response) => {
-                    resolve(response);
-                });
+            try {
+                const response = await orderModel.Order.find({ 'orders.createdAt': { $lt: startDate } });
+                resolve(response);
+            } catch (error) {
+                reject(error);
+            }
         });
     },
+    
 
     // get orders by category wise
 

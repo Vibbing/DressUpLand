@@ -33,7 +33,7 @@
           ></span>
           <div class="text">
             <h6 class="mb-1 card-title">Total Orders</h6>
-            <span><%=locals.length%></span>
+            <span><%=locals?.length%></span>
             <span class="text-sm"> Excluding orders in transit </span>
           </div>
         </article>
@@ -53,7 +53,7 @@
         </article>
       </div>
     </div>
-    <!-- <div class="col-lg-3">
+    <div class="col-lg-3">
       <div class="card card-body mb-4">
         <article class="icontext">
           <span class="icon icon-sm rounded-circle bg-info-light"
@@ -66,7 +66,7 @@
           </div>
         </article>
       </div>
-    </div> -->
+    </div>
   </div>
   <div class="row">
     <div class="col-xl-6 col-lg-12">
@@ -78,20 +78,20 @@
       </div>
      
     </div>
-    <!-- <div class="col-xl-3 col-lg-12">
+    <div class="col-xl-3 col-lg-12">
       <div class="card mb-4">
         <article class="card-body">
           <h5 class="card-title">Payment Mode</h5>
-          <canvas id="myChart2" ></canvas>
+          <canvas id="myChart0" ></canvas>
         </article>
       </div>
       
-    </div> -->
+    </div>
 
     <div class="col-xl-3 col-lg-12">
       <div class="card mb-4">
         <article class="card-body">
-          <h5 class="card-title">category Sales</h5>
+          <h5 class="card-title">Category Sales</h5>
           <canvas id="myChart3" ></canvas>
         </article>
       </div>
@@ -182,7 +182,7 @@ var barColors = [
   "#1e7145"
 ];
 
-new Chart("myChart2", {
+new Chart("myChart0", {
   type: "doughnut",
   data: {
     labels: xValue,

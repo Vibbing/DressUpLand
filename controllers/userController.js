@@ -18,17 +18,17 @@ module.exports = {
         let banner = null
         let user = req.session.user
         if (user) {
-             count = await cartHelpers.getCartCount(user._id)
-             wishlistCount = await wishListHelpers.getWishListCount(user._id)
-             banner = await userHelper.getAllBanner() 
-             coupon = await userHelper.getAllCoupons()
+            count = await cartHelpers.getCartCount(user._id)
+            wishlistCount = await wishListHelpers.getWishListCount(user._id)
+            banner = await userHelper.getAllBanner()
+            coupon = await userHelper.getAllCoupons()
         }
-        res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner,coupon })
+        res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner, coupon })
     },
 
     /* GET SignUp Page. */
     getSignup: (req, res) => {
-        res.render('user/signup', { layout: 'Layout'})
+        res.render('user/signup', { layout: 'Layout' })
     },
 
     /* Post SignUp Page. */
@@ -44,7 +44,7 @@ module.exports = {
 
     /* GET Login Page. */
     getLogin: (req, res) => {
-        res.render('user/login', { layout: 'Layout'})
+        res.render('user/login', { layout: 'Layout' })
     },
 
     /* Post Login Page. */
@@ -91,7 +91,7 @@ module.exports = {
     otpVerify: async (req, res) => {
 
         const { otp } = req.body;
-        
+
 
         let number = req.session.number
         const user = await userModel.User.findOne({ mobile: number }).lean().exec()
@@ -127,26 +127,29 @@ module.exports = {
 
     /* GET Shop Page. */
     getShop: async (req, res) => {
-        let user = req.session.user
-        console.log(req.query.sort);
-        let count = await cartHelpers.getCartCount(user._id)
-        const wishlistCount = await wishListHelpers.getWishListCount(user._id)
-        console.log(req.query);
-        if (req.query?.search || req.query?.sort || req.query?.filter) {
-            console.log('1');
-            const { product, currentPage, totalPages, noProductFound } = await userHelper.getQueriesOnShop(req.query)
-            noProductFound ?
-                req.session.noProductFound = noProductFound
-                : req.session.selectedProducts = product
-            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, productResult: req.session.noProductFound })
-        } else {
-            console.log('fetching all products')
-            product = await userHelper.getShop()
-            if (product.length != 0)
+        try {
+            let user = req.session.user
+            let count = await cartHelpers.getCartCount(user._id)
+            const wishlistCount = await wishListHelpers.getWishListCount(user._id)
+            const page = parseInt(req.query?.page) || 1
+            const perPage = 6
+            if (req.query?.search || req.query?.sort || req.query?.filter) {
+                const { product, currentPage, totalPages, noProductFound } = await userHelper.getQueriesOnShop(req.query)
+                noProductFound ?
+                    req.session.noProductFound = noProductFound
+                    : req.session.selectedProducts = product
+                res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, currentPage, totalPages, productResult: req.session.noProductFound })
+            } else {
+                let currentPage = 1
+                const { product, totalPages } = await userHelper.getAllProducts(page, perPage);
+                if (product.length != 0)
+                    req.session.noProductFound = false
+                res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, totalPages, currentPage, productResult: req.session.noProduct })
                 req.session.noProductFound = false
-            res.render('user/shop', { layout: 'Layout', product, user, count, wishlistCount, productResult: req.session.noProduct })
-            req.session.noProductFound = false
+            }
 
+        } catch (error) {
+            console.log(error)
         }
     },
 
@@ -161,7 +164,7 @@ module.exports = {
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         userHelper.getProductDetail(proId).then((product) => {
-            res.render('user/productDetail', {layout: 'Layout', product, user, count, wishlistCount })
+            res.render('user/productDetail', { layout: 'Layout', product, user, count, wishlistCount })
         })
     },
 
@@ -182,18 +185,18 @@ module.exports = {
         let count = await cartHelpers.getCartCount(user._id)
         const wishlistCount = await wishListHelpers.getWishListCount(user._id)
         wishListHelpers.getWishListProducts(user._id).then((wishlistProducts) => {
-            console.log(wishlistCount,'count');
-            res.render('user/wishList', {layout: 'Layout', user, count, wishlistProducts, wishlistCount })
+            console.log(wishlistCount, 'count');
+            res.render('user/wishList', { layout: 'Layout', user, count, wishlistProducts, wishlistCount })
         })
     },
 
     addWishList: (req, res) => {
         let proId = req.body.proId
         let userId = req.session.user._id
-        console.log(proId,'1');
-        console.log(userId,'2');
+        console.log(proId, '1');
+        console.log(userId, '2');
         wishListHelpers.addWishList(userId, proId).then((response) => {
-            console.log(response,'3');
+            console.log(response, '3');
             res.send(response)
         })
     },

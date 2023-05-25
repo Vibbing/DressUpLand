@@ -71,21 +71,21 @@ module.exports = {
         })
     },
     /* GET Shop Page. */
-    getShop: () => {
-        try {
-            return new Promise((resolve, reject) => {
-                productModel.Product.find().then((product) => {
-                    if (product) {
-                        resolve(product)
-                    } else {
-                        console.log('product not found');
-                    }
-                })
-            })
-        } catch (error) {
-            console.log(error.message);
-        }
+    getAllProducts: async (page, perPage) => {
+        const skip = (page - 1) * perPage;
+        const product = await productModel.Product.find()
+            .skip(skip)
+            .limit(perPage);
+        
+        const totalProducts = await productModel.Product.countDocuments();
+        const totalPages = Math.ceil(totalProducts / perPage);
+        
+        return {
+            product,
+            totalPages,
+        };
     },
+    
 
     /* GET Product Detail Page. */
     getProductDetail: (proId) => {

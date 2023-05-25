@@ -14,84 +14,81 @@ module.exports = {
     getDashboard: async (req, res) => {
         admin = req.session.admin;
         let totalProducts,
-          days = [];
+            days = [];
         let ordersPerDay = {};
         let paymentCount = [];
-    
+
         let Products = await adminHelpers.getAllProducts();
         totalProducts = Products.length;
-    
+
         await orderHelpers.getOrderByDate().then((response) => {
-          let result = response;
-          for (let i = 0; i < result.length; i++) {
-            for (let j = 0; j < result[i].orders.length; j++) {
-              let ans = {};
-              ans["createdAt"] = result[i].orders[j].createdAt;
-              days.push(ans);
+
+            let result = response;
+            for (let i = 0; i < result.length; i++) {
+                for (let j = 0; j < result[i].orders.length; j++) {
+                    let ans = {};
+                    ans["createdAt"] = result[i].orders[j].createdAt;
+                    days.push(ans);
+                }
             }
-          }
-    
-          days.forEach((order) => {
-            let day = order.createdAt.toLocaleDateString("en-US", {
-              weekday: "long",
+
+            days.forEach((order) => {
+                let day = order.createdAt.toLocaleDateString("en-US", {
+                    weekday: "long",
+                });
+                ordersPerDay[day] = (ordersPerDay[day] || 0) + 1;
+
             });
-            ordersPerDay[day] = (ordersPerDay[day] || 0) + 1;
-          });
         });
-    
+
         let getCodCount = await adminHelpers.getCodCount();
-    
         let codCount = getCodCount.length;
-    
+
         let getOnlineCount = await adminHelpers.getOnlineCount();
         let onlineCount = getOnlineCount.length;
-    
+
         let getWalletCount = await adminHelpers.getWalletCount();
         let WalletCount = getWalletCount.length;
-    
+
         paymentCount.push(onlineCount);
         paymentCount.push(codCount);
         paymentCount.push(WalletCount);
-    
+
         let orderByCategory = await orderHelpers.getOrderByCategory()
-    
-        let Men=0, Women=0, Kids=0
-        orderByCategory[0].forEach((Products)=>
-        {
-          if(Products.category == 'Men') Men ++
-          if(Products.category == 'Women') Women ++
-          if(Products.category == 'Kids') Kids ++
-        })
-        let category = []
-        category.push(Men)
-        category.push(Women)
-        category.push(Kids)
-    
-    
-        await orderHelpers.getAllOrders().then((response) => {
-            console.log(response[0].orders.totalPrice, 'response');
-            let length = response.length;
-          
-            let total = 0;
-          
-            for (let i = 0; i < length; i++) {
-              console.log(response[i].orders.totalPrice);
-              for (let j = 0; j < response[i].orders.length; j++) {
-                total += response[i].orders[j].totalPrice;
-              }
-            }
-          res.render('admin/dashboard', {
-            layout: "adminLayout",
-            admin,
-            length,
-            total,
-            totalProducts,
-            ordersPerDay,
-            paymentCount,
-            category
-          });
+
+
+        let Men = 0, Women = 0, Kids = 0;
+
+        orderByCategory.forEach((order) => {
+            order.forEach((product) => {
+                if (product.category === 'Men') Men += product.quantity;
+                else if (product.category === 'Women') Women += product.quantity;
+                else if (product.category === 'Kids') Kids += product.quantity;
+            });
         });
-      },
+
+        let category = [Men, Women, Kids];
+
+        orderHelpers.getAllOrders().then((response) => {
+
+            let length = response;
+
+            orderHelpers.getAllOrdersSum().then((response) => {
+                let total = response
+
+                res.render('admin/dashboard', {
+                    layout: "adminLayout",
+                    admin,
+                    length,
+                    total,
+                    totalProducts,
+                    ordersPerDay,
+                    paymentCount,
+                    category
+                })
+            });
+        });
+    },
 
     /* GET Login Page. */
     getLogin: (req, res) => {
@@ -300,11 +297,11 @@ module.exports = {
                     const originalPrice = product.price
                     const discount = req.body.offer_percentage / 100
                     const discountedPrice = Math.floor(originalPrice - (originalPrice * discount));
-                    console.log(discountedPrice,'discount');
-                    console.log(originalPrice,'originalPrice');
-                    console.log(req.body.discount,'req.body.discount');
-                    console.log(req.body,'req.body');
-                    
+                    console.log(discountedPrice, 'discount');
+                    console.log(originalPrice, 'originalPrice');
+                    console.log(req.body.discount, 'req.body.discount');
+                    console.log(req.body, 'req.body');
+
                     await productModel.Product.updateOne(
                         { _id: product._id },
                         {
@@ -470,7 +467,7 @@ module.exports = {
 
     /* POST Sales Report Page. */
     postSalesReport: (req, res) => {
-  
+
         let admin = req.session.admin
         let details = []
         const getDate = (date) => {
@@ -482,65 +479,65 @@ module.exports = {
         }
 
         adminHelpers.postReport(req.body).then((orderData) => {
-            console.log(orderData,'order');
+            console.log(orderData, 'order');
             orderData.forEach((orders) => {
                 details.push(orders.orders)
             })
-            console.log(details,'details');
-  
+            console.log(details, 'details');
+
             res.render("admin/salesReport", { layout: 'adminLayout', admin, details, getDate })
         })
 
     },
 
 
-    getAddBanner:(req,res)=>{
+    getAddBanner: (req, res) => {
         let admin = req.session.admin
-        res.render('admin/addBanner',{layout : 'adminLayout',admin})
+        res.render('admin/addBanner', { layout: 'adminLayout', admin })
     },
 
     postAddBanner: (req, res) => {
         adminHelpers.addBanner(req.body, req.file.filename).then((response) => {
-          if (response) {
-            console.log(response,'000');
-            res.redirect("/admin/add-banner");
-          } else {
-            res.status(505);
-          }
+            if (response) {
+                console.log(response, '000');
+                res.redirect("/admin/add-banner");
+            } else {
+                res.status(505);
+            }
         });
-      },
+    },
 
-      getBannerList:(req,res)=>{
+    getBannerList: (req, res) => {
         let admin = req.session.admin
-        adminHelpers.getBannerList().then((banner)=>{
-            console.log(banner,'banner');
+        adminHelpers.getBannerList().then((banner) => {
+            console.log(banner, 'banner');
 
-            res.render('admin/bannerList',{layout : 'adminLayout',admin,banner})
+            res.render('admin/bannerList', { layout: 'adminLayout', admin, banner })
         })
-      },
+    },
 
-      getEditBanner:(req,res)=>{
+    getEditBanner: (req, res) => {
         let admin = req.session.admin
-        adminHelpers.getEditBanner(req.query.banner).then((banner)=>{
-            res.render("admin/editBanner", {layout : "adminLayout", admin, banner})
+        adminHelpers.getEditBanner(req.query.banner).then((banner) => {
+            res.render("admin/editBanner", { layout: "adminLayout", admin, banner })
         })
-      },
+    },
 
-      postEditBanner:(req,res)=>{
-        console.log(req.query.editbanner,'req.query.editbanner');
-        console.log( req.body,'req.body');
-        console.log( req?.file?.filename,' req?.file?.filename');
-        adminHelpers.postEditBanner(req.query.editbanner, req.body, req?.file?.filename).then((response)=>{
+    postEditBanner: (req, res) => {
+        console.log(req.query.editbanner, 'req.query.editbanner');
+        console.log(req.body, 'req.body');
+        console.log(req?.file?.filename, ' req?.file?.filename');
+        adminHelpers.postEditBanner(req.query.editbanner, req.body, req?.file?.filename).then((response) => {
             res.redirect("/admin/banner-list")
         })
-      },
+    },
 
-      deleteBanner:(req,res)=>{
-        adminHelpers.deleteBanner(req.params.id).then((response)=>{
+    deleteBanner: (req, res) => {
+        adminHelpers.deleteBanner(req.params.id).then((response) => {
             res.send(response)
         })
-      }
-    
+    }
+
 
 
     // errorPage:(req,res)=>{

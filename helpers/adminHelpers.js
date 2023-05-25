@@ -309,7 +309,7 @@ module.exports = {
     },
 
     postReport: (date) => {
-        console.log(date, 'date+++++');
+  
         try {
             let start = new Date(date.startdate);
             let end = new Date(date.enddate);
