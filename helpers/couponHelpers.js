@@ -44,10 +44,8 @@ module.exports = {
 
     /* GET Coupon List Page. */
     getCouponList: () => {
-        console.log('---');
-
         return new Promise((resolve, reject) => {
-            couponModel.Coupon.find().then((coupons) => {
+            couponModel.Coupon.find().sort({createdAt : -1}).then((coupons) => {
                 console.log(coupons, '-----');
                 resolve(coupons)
             })

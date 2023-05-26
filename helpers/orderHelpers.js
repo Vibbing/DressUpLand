@@ -357,7 +357,7 @@ module.exports = {
     getOrders: (userId) => {
         try {
             return new Promise((resolve, reject) => {
-                orderModel.Order.findOne({ user: userId }).then((user) => {
+                orderModel.Order.findOne({ user: userId }).sort({ createdAt: -1 }).then((user) => {
                     resolve(user)
                 })
             })
@@ -565,7 +565,7 @@ module.exports = {
                                         { 'orders._id': orderId },
                                         {
                                             $set: {
-                                                ['orders.' + orderIndex + '.orderConfirm']: 'Canceled',
+                                                ['orders.' + orderIndex + '.orderConfirm']: 'Canceled by User',
                                                 ['orders.' + orderIndex + '.paymentStatus']: 'Refunded'
                                             }
                                         }

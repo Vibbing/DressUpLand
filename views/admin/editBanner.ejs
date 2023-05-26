@@ -7,18 +7,24 @@
           <h2 class="text-center">Edit Banner</h2>
           <form action="/admin/edit-banner?editbanner=<%=banner._id%>" method="POST" enctype="multipart/form-data">
             <label for="">Title</label>
-            <input type="text" name="title" class="form-control" value="<%=banner.title%>" />
+            <input type="text" name="title" class="form-control" value="<%=banner.title%>" required />
             <br>
-            <label for="">Description</label>
-            <input type="text" name="description" class="form-control" value="<%=banner.description%>" />
+            <label for="">Main Description</label>
+            <input type="text" name="mainDescription" class="form-control" id="mainDescription" value="<%=banner.mainDescription%>" required />
+            <br>
+            <label for="">Sub Description</label>
+            <input type="text" name="subDescription" class="form-control"  id="subDescription" value="<%=banner.subDescription%>" required />
+            <br>
+            <label for="">Category Offer</label>
+            <input type="text" name="categoryOffer" class="form-control" id="categoryOffer" value="<%=banner.categoryOffer%>" required />
             <br>
             <label for="">Link</label>
-            <input type="text" name="link" class="form-control" value="<%=banner.link%>" />
+            <input type="text" name="link" class="form-control" value="<%=banner.link%>" required />
             <br>
             <label for="">Image</label>
-            <img src="/productimages/<%=banner?.image%>" alt="" style="width:100px;height:auto ">
+            <img class="w-25 h-25" src="/productimages/<%=banner?.image%>" id="imgView" alt="" required>
+            <input type="file" name="image" class="form-control" required onchange="viewImage(event)" accept=".jpg, .jpeg, .png, .avif" />
             <br>
-            <input type="file" name="image1" class="form-control" />
             <button type="submit" class="btn btn-info text-white mt-4">Submit</button>
           </form>
         </div>
@@ -30,6 +36,14 @@
 <br>
 <br>
 <br>
+
+<script>
+   function viewImage(event) {
+      selectedFile = event.target.files[0];
+      document.getElementById('imgView').src = URL.createObjectURL(selectedFile);
+    }
+
+</script>
 
 <style>
   body {

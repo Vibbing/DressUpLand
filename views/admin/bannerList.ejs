@@ -33,18 +33,39 @@
   
 
   <script>
-    function deleteBanner(deleteId)
-    {
+  function deleteBanner(deleteId) {
+  swal({
+    title: 'Confirmation',
+    text: 'Are you sure you want to delete this banner?',
+    icon: 'warning',
+    buttons: {
+      confirm: 'Yes, delete it!',
+      cancel: 'Cancel'
+    },
+    closeOnClickOutside: false,
+    closeOnEsc: false
+  }).then((confirmed) => {
+    if (confirmed) {
       $.ajax({
-        url:'/admin/delete-banner/'+deleteId,
-        method:'DELETE',
-        success:(response)=>
-        {
-          console.log(response);
-          location.reload() 
+        url: '/admin/delete-banner/' + deleteId,
+        method: 'DELETE',
+        success: (response) => {
+          swal({
+            title: 'Deleted!',
+            text: 'The banner has been deleted.',
+            icon: 'success',
+            buttons: 'OK',
+            timer: 4000
+          }).then(() => {
+            location.reload();
+          });
         }
-      })
+      });
     }
+  });
+}
+
+
   </script>
 
   

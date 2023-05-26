@@ -34,7 +34,7 @@ module.exports = {
     getUserList: () => {
         try {
             return new Promise((resolve, reject) => {
-                userModel.User.find().then((user) => {
+                userModel.User.find().sort({createdAt : -1 }).then((user) => {
                     if (user) {
                         resolve(user)
                     } else {
@@ -175,7 +175,7 @@ module.exports = {
     getProductList: () => {
         try {
             return new Promise((resolve, reject) => {
-                productModel.Product.find().then((product) => {
+                productModel.Product.find().sort({_id : -1}).then((product) => {
                     if (product) {
                         resolve(product)
                     } else {
@@ -441,7 +441,10 @@ module.exports = {
             {
                 $set:{
                     title : text.title,
-                    description :text.description,
+                    mainDescription : text.mainDescription,
+                    subDescription :text.subDescription,
+                    categoryOffer : text.categoryOffer,
+                    link : text.link,
                     image : image
                 }
             }).then((bannerUpdated)=>{

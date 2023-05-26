@@ -8,8 +8,6 @@ const userController = require('./userController')
 const couponHelpers = require('../helpers/couponHelpers')
 
 
-
-
 module.exports = {
 
     /* GET Dashboard */
@@ -95,7 +93,7 @@ module.exports = {
 
     /* GET Login Page. */
     getLogin: (req, res) => {
-        res.render('admin/login', { layout: 'adminLayout' })
+        res.render('admin/login', { layout: 'loginLayout' })
     },
 
     /* Post Login Page. */
@@ -247,7 +245,7 @@ module.exports = {
     getProductList: (req, res) => {
         let admin = req.session.admin
         adminHelpers.getProductList().then((product) => {
-            console.log(Product);
+            // console.log(Product);
             res.render('admin/productList', { layout: 'adminLayout', product, admin })
         })
     },
@@ -362,8 +360,12 @@ module.exports = {
         let admin = req.session.admin
         // orderHelpers.getAddress(userId).then((address) => {
         adminHelpers.getUserList(userId).then((user) => {
-            console.log(user, 'user');
-            orderHelpers.getOrders(userId).then((order) => {
+            orderHelpers.getOrders(userId).then((response) => {
+                let order = response?.orders
+                function sortByCreatedAt(a, b) {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+                order?.sort(sortByCreatedAt)
                 res.render('admin/orderList', { layout: 'adminLayout', user, userId, admin, order })
             })
         })
@@ -409,6 +411,7 @@ module.exports = {
     /* GET Generate Coupon Code Page. */
     generatorCouponCode: (req, res) => {
         couponHelpers.generatorCouponCode().then((couponCode) => {
+            console.log(couponCode, '-----');
             res.send(couponCode)
         })
     },
@@ -431,7 +434,6 @@ module.exports = {
     /* GET Coupon List Page. */
     getCouponList: (req, res) => {
         let admin = req.session.admin
-        console.log('called coupon list page')
         couponHelpers.getCouponList().then((couponList) => {
             res.render('admin/couponList', { layout: 'adminLayout', admin, couponList })
         })
@@ -495,32 +497,18 @@ module.exports = {
         res.render('admin/addBanner', { layout: 'adminLayout', admin })
     },
 
-   /* POST Add Banner */
-postAddBanner: (req, res) => {
-    adminHelpers.addBanner(req.body, req.file.filename).then((response) => {
-      if (response) {
-        // Add SweetAlert for success
-        Swal.fire({
-          title: 'Success!',
-          text: 'Banner has been added.',
-          icon: 'success',
-          confirmButtonText: 'OK'
-        }).then(() => {
-          res.redirect("/admin/banner-list");
+    postAddBanner: (req, res) => {
+        console.log(req.body, 'reqbody');
+        console.log(req.file.filename, 'files');
+        adminHelpers.addBanner(req.body, req.file.filename).then((response) => {
+            if (response) {
+                console.log(response, '000');
+                res.send({ status: true })
+            } else {
+                res.send({ status: false });
+            }
         });
-      } else {
-        // Add SweetAlert for failure
-        Swal.fire({
-          title: 'Error!',
-          text: 'Failed to add the banner.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-        res.status(505);
-      }
-    });
-  },
-  
+    },
 
     getBannerList: (req, res) => {
         let admin = req.session.admin

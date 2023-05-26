@@ -15,18 +15,22 @@
           <small class="text-muted">Order ID: <%=orderId%></small>
         </div>
         <div class="col-lg-6 col-md-6 ms-auto text-md-end">
-                <% if (orderDetails[0].orders.orderConfirm !== 'Returned') { %>
-            <select id="orderStatus" class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
-
-                    <option value="confirmed" <%= (orderDetails[0].orders.orderConfirm === 'confirmed') ? 'selected' : '' %>>Confirmed</option>
+          <% if (orderDetails[0].orders.orderConfirm !== 'Returned') { %>
+            <% if (orderDetails[0].orders.orderConfirm !== 'Canceled by Admin' && orderDetails[0].orders.orderConfirm !== 'Canceled by User') { %>
+              <select id="orderStatus" class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
+                <option value="" disabled selected>Change Status</option>
+                <option value="confirmed" <%= (orderDetails[0].orders.orderConfirm === 'confirmed') ? 'selected' : '' %>>Confirmed</option>
                 <option value="shipped" <%= (orderDetails[0].orders.orderConfirm === 'shipped') ? 'selected' : '' %>>Shipped</option>
                 <option value="delivered" <%= (orderDetails[0].orders.orderConfirm === 'delivered') ? 'selected' : '' %>>Delivered</option>
-                <option value="canceled" <%= (orderDetails[0].orders.orderConfirm === 'canceled') ? 'selected' : '' %>>Cancel</option>
+                <option value="canceled" <%= (orderDetails[0].orders.orderConfirm === 'Canceled by Admin') ? 'selected' : '' %>>Cancel</option>
               </select>
-
-                  <% } else { %>
-                    <p class="text-danger ">Returned</p>
-                  <% } %>
+            <% } else { %>
+              <p class="text-danger"><%=orderDetails[0].orders.orderConfirm%></p>
+            <% } %>
+          <% } else { %>
+            <p class="text-danger">Returned</p>
+          <% } %>
+          
                   
                 
                 

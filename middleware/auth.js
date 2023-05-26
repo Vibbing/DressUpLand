@@ -14,7 +14,7 @@ module.exports = {
         if (req.session.admin) {
             next()
         } else {
-            res.render('admin/login', { layout: 'adminLayout' })
+            res.redirect('/admin/login')
         }
     },
 
