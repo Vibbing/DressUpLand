@@ -10,7 +10,7 @@ const orderControllers = require('../controllers/orderControllers');
 router.get('/dashboard', auth.adminAuth, adminController.getDashboard)
 
 /* GET Login Page. */
-router.get('/login', auth.adminAuth, adminController.getLogin)
+router.get('/login',auth.adminRedirecting, adminController.getLogin)
 
 /* Post Login Page. */
 router.post('/login',  adminController.postLogin)
@@ -87,7 +87,7 @@ router.route('/coupon-list').get(auth.adminAuth,adminController.getCouponList)
 router.route('/remove-coupon').delete(adminController.removeCoupon)
 
 /* GET and POST Sales Report Page. */
-router.route('/sales-report').get(adminController.getSalesReport).post(adminController.postSalesReport)
+router.route('/sales-report').get( auth.adminAuth,adminController.getSalesReport).post(adminController.postSalesReport)
 
 router.route('/add-banner').get(auth.adminAuth,adminController.getAddBanner).post(multer.addBannerupload,adminController.postAddBanner)
 

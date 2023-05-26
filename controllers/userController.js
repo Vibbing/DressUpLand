@@ -27,7 +27,6 @@ module.exports = {
             banner = await userHelper.getAllBanner()
             coupon = await userHelper.getAllCoupons()
             product = await userHelper.getAllProductsForHome()
-            console.log(product,'prodcut');
         }
         res.render('homePage', { layout: 'Layout', user, count, wishlistCount, banner, coupon, product })
     },
@@ -240,14 +239,53 @@ module.exports = {
         })
     },
     /* GET About us */
-    getAboutUs: (req, res) => {
-        res.render('user/aboutUs', { layout: 'Layout' })
+    getAboutUs: async (req, res) => {
+        let user = req.session.user
+        if(user){
+            let count = await cartHelpers.getCartCount(user._id)
+            const wishlistCount = await wishListHelpers.getWishListCount(user._id)
+            res.render('user/aboutUs', { layout: 'Layout',user, count, wishlistCount })
+        }else{
+            res.render('user/aboutUs', { layout: 'Layout'})
+        }
     },
 
     /* GET Contact us */
-    getContactUs: (req, res) => {
-        res.render('user/contactUs', { layout: 'Layout' })
+    getContactUs: async (req, res) => {
+        let user = req.session.user
+        if(user){
+            let count = await cartHelpers.getCartCount(user._id)
+            const wishlistCount = await wishListHelpers.getWishListCount(user._id)
+            res.render('user/contactUs', { layout: 'Layout',user, count, wishlistCount })
+        }else{
+            res.render('user/contactUs', { layout: 'Layout'})
+        }
     },
+
+    /* GET Privacy Policy Page. */
+    getPrivacyPolicy:async (req,res)=>{
+        let user = req.session.user
+        if(user){
+            let count = await cartHelpers.getCartCount(user._id)
+            const wishlistCount = await wishListHelpers.getWishListCount(user._id)
+            res.render('user/privacyPolicy',{layout : 'Layout',user, count, wishlistCount})
+        }else{
+            res.render('user/privacyPolicy',{layout : 'Layout'})
+
+        }
+    },
+
+    /* GET Terms And Conditions Page. */
+    getTermsAndConditions:async (req,res)=>{
+        let user = req.session.user
+        if(user){
+            let count = await cartHelpers.getCartCount(user._id)
+            const wishlistCount = await wishListHelpers.getWishListCount(user._id)
+        res.render('user/termsAndConditions',{layout : 'Layout',user, count, wishlistCount})
+    }else{
+        res.render('user/termsAndConditions',{layout : 'Layout',})
+    }
+},
 
     /* POST Contact us */
     postContactUs: (req, res) => {

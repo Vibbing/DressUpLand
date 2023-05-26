@@ -8,6 +8,8 @@ const userController = require('./userController')
 const couponHelpers = require('../helpers/couponHelpers')
 
 
+
+
 module.exports = {
 
     /* GET Dashboard */
@@ -407,7 +409,6 @@ module.exports = {
     /* GET Generate Coupon Code Page. */
     generatorCouponCode: (req, res) => {
         couponHelpers.generatorCouponCode().then((couponCode) => {
-            console.log(couponCode, '-----');
             res.send(couponCode)
         })
     },
@@ -479,11 +480,9 @@ module.exports = {
         }
 
         adminHelpers.postReport(req.body).then((orderData) => {
-            console.log(orderData, 'order');
             orderData.forEach((orders) => {
                 details.push(orders.orders)
             })
-            console.log(details, 'details');
 
             res.render("admin/salesReport", { layout: 'adminLayout', admin, details, getDate })
         })
@@ -496,16 +495,32 @@ module.exports = {
         res.render('admin/addBanner', { layout: 'adminLayout', admin })
     },
 
-    postAddBanner: (req, res) => {
-        adminHelpers.addBanner(req.body, req.file.filename).then((response) => {
-            if (response) {
-                console.log(response, '000');
-                res.redirect("/admin/add-banner");
-            } else {
-                res.status(505);
-            }
+   /* POST Add Banner */
+postAddBanner: (req, res) => {
+    adminHelpers.addBanner(req.body, req.file.filename).then((response) => {
+      if (response) {
+        // Add SweetAlert for success
+        Swal.fire({
+          title: 'Success!',
+          text: 'Banner has been added.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          res.redirect("/admin/banner-list");
         });
-    },
+      } else {
+        // Add SweetAlert for failure
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to add the banner.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+        res.status(505);
+      }
+    });
+  },
+  
 
     getBannerList: (req, res) => {
         let admin = req.session.admin

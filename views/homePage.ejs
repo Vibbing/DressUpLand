@@ -423,17 +423,17 @@
           <div class="product-cart-wrap small hover-up">
             <div class="product-img-action-wrap">
               <div class="product-img product-img-zoom">
-                <a href="shop-product-right.html">
+                <a href="/product-detail/<%=product._id%>">
                   <img class="default-img" src="/productImages/<%= product.img[0]%>" alt="">
                   <img class="hover-img" src="/productImages/<%= product.img[0]%>" alt="">
                 </a>
               </div>
               <div class="product-action-1">
-                <a aria-label="Quick view" class="action-btn small hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal">
-                  <i class="fi-rs-eye"></i>
-                </a>
-                <a aria-label="Add To Wishlist" class="action-btn small hover-up" href="shop-wishlist.html" tabindex="0">
+                <a aria-label="Add To Wishlist" class="action-btn small hover-up" onclick="addToWishList('<%=product._id%>')" href="#" tabindex="0">
                   <i class="fi-rs-heart"></i>
+                </a>
+                <a aria-label="Add To Cart" class="action-btn hover-up" href="#" onclick="addToCart('<%=product.id%>')">
+                  <i class="fi-rs-shopping-bag-add"></i>
                 </a>
               </div>
               <div class="product-badges product-badges-position product-badges-mrg">
@@ -442,15 +442,19 @@
             </div>
             <div class="product-content-wrap">
               <h2>
-                <a href="shop-product-right.html">
+                <a href="/product-detail/<%=product._id%>" >
                   <% let words = product.name.split(' '); %>
                   <% let truncatedName = words.slice(0, 4).join(' '); %>
                   <%= truncatedName %>
                 </a>
               </h2>
               <div class="product-price">
-                <span>$238.85 </span>
-                <span class="old-price">$245.8</span>
+                <% if(product.discountedPrice > 0) { %> 
+                  <span class="discounted-price">₹<%= product.discountedPrice %></span>
+                  <small class="text-muted" style="text-decoration: line-through; margin-left: 10px;font-size: 14px;">₹<%= product.price %></small>
+                <% } else { %> 
+                  <span>₹<%= product.price %></span>
+                <% } %>
               </div>
             </div>
           </div>
@@ -566,7 +570,7 @@
 </main>
 
 
-
+<!-- main banner -->
 <script>
   // Wait for the DOM to be loaded
   document.addEventListener('DOMContentLoaded', function() {
@@ -637,6 +641,7 @@
   });
 </script>
 
+<!-- coupon banner -->
 <script>
   // Initialize countdown timers
   const countdownElements = document.querySelectorAll('.deals-countdown');
@@ -705,6 +710,67 @@
 </script>
 
 
+<script>
+   
+   //add to wish list ajax call
+   function addToWishList(proId) {
+    $.ajax({
+      url: '/add-to-wishlist',
+      method: 'POST',
+      data: {
+        proId: proId
+      },
+      success: (response) => {
+        if (response.status) {
+          // Product added to Wishlist successfully
+          Swal.fire({
+            icon: 'success',
+            title: 'Product added to Wishlist!',
+            showConfirmButton: false,
+            timer: 3000
+          });
+          // Reload page after 3 seconds
+          setTimeout(function() {
+            location.reload();
+          }, 3000);
+
+        } else {
+          // Error adding product to Wishlist
+          Swal.fire({
+            icon: 'error',
+            title: 'Product already exist in Wishlist',
+            timer: 3000
+          });
+
+        }
+      }
+    })
+  }
+
+   // add to cart ajax call
+   function addToCart(proId) {
+    $.ajax({
+      url: '/add-to-cart/' + proId,
+      method: 'POST',
+      data: {
+        proId: proId
+      },
+      success: (response) => {
+        if (response.status) {
+          location.reload()
+        } else if (response.error) {
+          Swal.fire({
+            icon: 'warning',
+            title: response.message,
+            showConfirmButton: false,
+            timer: 4000
+          })
+
+        }
+      }
+    })
+  }
+</script>
 <style>
   .carousel-image {
     width: 100%;
@@ -764,36 +830,33 @@
 
 <!-- product css -->
 <style>
-.product-cart-wrap {
-  width: 200px; /* Set a fixed width for the product card */
-}
-
-.product-img {
-  position: relative; /* Add position: relative */
+  .product-cart-wrap {
+    width: 200px; /* Set a fixed width for the product card */
+  }
+  
+  .product-img {
+    position: relative; /* Add position: relative */
+    width: 100%;
+    height: 200px; /* Set a fixed height for the product image */
+    overflow: hidden;
+  }
+  
+  .product-img img {
   width: 100%;
-  height: 200px; /* Set a fixed height for the product image */
-  overflow: hidden;
+  height: 100%;
+  
 }
 
-.product-img img {
-  position: absolute; /* Add position: absolute */
-  top: 50%; /* Position the image at the center vertically */
-  left: 50%; /* Position the image at the center horizontally */
-  transform: translate(-50%, -50%); /* Center the image precisely */
-  max-width: 100%; /* Ensure the image doesn't exceed its original dimensions */
-  max-height: 100%; /* Ensure the image doesn't exceed its original dimensions */
-}
-
-.product-content-wrap {
-  height: 100px; /* Set a fixed height for the product content */
-  overflow: hidden;
-}
-
-.product-price {
-  margin-top: 10px;
-}
-
-/* Adjust the styles as needed to achieve the desired appearance */
-
-
-</style>
+  
+  .product-content-wrap {
+    height: 100px; /* Set a fixed height for the product content */
+    overflow: hidden;
+  }
+  
+  .product-price {
+    margin-top: 10px;
+  }
+  
+  /* Adjust the styles as needed to achieve the desired appearance */
+  </style>
+  
