@@ -30,11 +30,7 @@ router.get('/addCategory',auth.adminAuth, adminController.getAddCategory)
 /* Post addCategory Page. */
 router.post('/addCategory',adminController.postAddCategory)
 
-// /* GET editCategory Page. */
-// router.get('/editCategory',auth.adminAuth,adminController.getEditCategory)
-
-// /* Post editCategory Page. */
-// router.get('/editCategory',auth.adminAuth,adminController.postEditCategory)
+// /* GET and Post editCategory Page. */
 
 router.route('/api/edit-category/:id').get(auth.adminAuth,adminController.handleEditCategorys).patch(adminController.handleEditCategoryPatch);
 

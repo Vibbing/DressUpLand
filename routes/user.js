@@ -5,7 +5,6 @@ const cartController = require('../controllers/cartController')
 const orderController = require('../controllers/orderControllers')
 const auth = require('../middleware/auth');
 const { checkProductQty, checkProductQtyCart } = require('../middleware/productQtyCheck');
-const orderControllers = require('../controllers/orderControllers');
 
 /* GET Home Page. */
 router.get('/', auth.userAuth, userController.getHomePage)
@@ -71,7 +70,7 @@ router.get('/get-profile', auth.userAuth, orderController.getAddress)
 router.route('/add-address').post(auth.userAuth, orderController.postAddress)
 
 /* GET Edit Address Page */
-router.route('/edit-address/:id').get(orderController.getEditAddress).patch(orderControllers.patchEditAddress)
+router.route('/edit-address/:id').get(orderController.getEditAddress).patch(orderController.patchEditAddress)
 
 /* DELETE  Address Page */
 router.route('/delete-address/:id').delete(orderController.deleteAddress)
