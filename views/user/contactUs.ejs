@@ -107,6 +107,7 @@
         message: message
       },
       success: (response) => {
+        console.log(response,'---');
         if (response.status) {
           // Success case with timer
           swal({

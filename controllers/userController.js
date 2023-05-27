@@ -289,6 +289,7 @@ module.exports = {
 
     /* POST Contact us */
     postContactUs: (req, res) => {
+        console.log(req.body,'body');
         try {
             const { name, email, message } = req.body;
 
