@@ -274,6 +274,10 @@ module.exports = {
                         $project: { item: "$Address" }
                     }
                 ])
+                if (Address.length === 0) {
+                    reject(new Error("User does not have an address."))
+                    return; // Exit the function to prevent further execution
+                }
 
                 let status, orderStatus;
                 if (data.payment_option === "COD") {

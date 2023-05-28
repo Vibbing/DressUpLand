@@ -78,13 +78,11 @@ module.exports = {
 
     /* POST Check Out Page */
     postCheckOut: async (req, res) => {
-        console.log(req.body, 'body');
         try {
             let userId = req.session.user._id
             let data = req.body;
             let total = data.discountedAmount
             let couponCode = data.couponCode
-            console.log(total,couponCode,'---------');
             await couponHelpers.addCouponToUser(couponCode, userId)
             try {
                 const response = await orderHelpers.placeOrder(data);
@@ -93,14 +91,11 @@ module.exports = {
                     res.json({ codStatus: true });
                 } else if (data.payment_option === "razorpay") {
                     const order = await orderHelpers.generateRazorpay(req.session.user._id, total);
-                    console.log(order, ';;');
                     res.json(order);
                 } else if (data.payment_option === 'wallet') {
                     res.json({ orderStatus: true, message: 'order placed successfully' })
                 }
             } catch (error) {
-                console.log('got here ----');
-                console.log({error : error.message},'22');
                 res.json({status : false , error : error.message})
             }
         } catch (error) {
