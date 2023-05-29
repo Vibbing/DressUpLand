@@ -125,8 +125,8 @@ module.exports = {
         if (status === 'false') {
             req.session.user = null
         }
-        adminHelpers.changeUserStatus(userId, status).then(() => {
-            res.send(status)
+        adminHelpers.changeUserStatus(userId, status).then((response) => {
+            res.send({user : status})
         })
     },
 

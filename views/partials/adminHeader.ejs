@@ -11,39 +11,39 @@
   </div>
   <nav>
     <ul class="menu-aside">
-      <li class="menu-item active">
-        <a class="menu-link" href="/admin/dashboard"> <i class="icon material-icons md-home"></i>
+      <li class="menu-item">
+        <a id="dashboard-link" class="menu-link" href="/admin/dashboard"> <i class="icon material-icons md-home"></i>
           <span class="text">Dashboard</span>
         </a>
       </li>
       <li class="menu-item">
-        <a class="menu-link" href="/admin/productList">
+        <a id="Products-link" class="menu-link" href="/admin/productList">
           <i class="icon material-icons md-shopping_bag"></i>
           <span class="text">Products</span>
         </a>
       </li>
       <li class="menu-item ">
-        <a class="menu-link" href="/admin/addCategory"> <i class="icon material-icons md-shopping_bag"></i>
+        <a id="Categories-link" class="menu-link" href="/admin/addCategory"> <i class="icon material-icons md-shopping_bag"></i>
           <span class="text">Categories</span>
         </a>
       </li>
       <li class="menu-item">
-        <a class="menu-link" href="/admin/userList"> <i class="icon material-icons md-person"></i>
+        <a id="Users-link" class="menu-link" href="/admin/userList"> <i class="icon material-icons md-person"></i>
           <span class="text">Users</span>
         </a>
       </li>
       <li class="menu-item">
-        <a class="menu-link" href="/admin/coupon-list"> <i class="icon material-icons md-archive"></i>
+        <a id="Coupons-link" class="menu-link" href="/admin/coupon-list"> <i class="icon material-icons md-archive"></i>
           <span class="text">Coupons</span>
         </a>
       </li>
       <li class="menu-item">
-        <a class="menu-link" href="/admin/sales-report"> <i class="icon material-icons md-person"></i>
+        <a id="Sales Report-link" class="menu-link" href="/admin/sales-report"> <i class="icon material-icons md-person"></i>
           <span class="text">Sales Report</span>
         </a>
       </li>
       <li class="menu-item">
-        <a class="menu-link" href="/admin/banner-list"> <i class="icon material-icons md-person"></i>
+        <a id="Banner-link" class="menu-link" href="/admin/banner-list"> <i class="icon material-icons md-person"></i>
           <span class="text">Banner</span>
         </a>
       </li>
@@ -85,3 +85,34 @@
       </ul>
     </div>
   </header>
+
+  
+  <script>
+    $(document).ready(function() {
+  
+      // Get the current URL path
+      let path = window.location.pathname;
+  
+      // Remove the leading slash from the path
+      path = path.substring(1);
+  
+      // Remove any query parameters from the path
+      if (path.indexOf('?') !== -1) {
+        path = path.substring(0, path.indexOf('?'));
+      }
+  
+      // Find the menu item with matching href and add the active class
+      $('.menu-link').each(function() {
+        let href = $(this).attr('href');
+  
+        // Check if the href matches the current path
+        if (href === '/' + path) {
+          $(this).closest('.menu-item').addClass('active');
+        }
+      });
+    });
+  </script>
+  
+  
+  
+    

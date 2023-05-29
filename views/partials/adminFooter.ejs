@@ -2,7 +2,11 @@
   <div class="row pb-30 pt-15">
     <div class="col-sm-6">
       <script>
-        document.write(new Date().getFullYear())
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.toLocaleString('default', { month: 'long' });
+        const date = currentDate.getDate();
+        document.write(date + ' ' + month + ', ' + year);
       </script>
     </div>
     <div class="col-sm-6">

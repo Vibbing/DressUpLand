@@ -44,15 +44,15 @@
                   <% if (item.status == true) { %>
                   <td><span class="badge rounded-pill alert-success">Active</span></td>
                   <% } else { %>
-                    <td><span class="badge rounded-pill alert-danger">Inactive</span></td>
-                    <% } %>
+                  <td><span class="badge rounded-pill alert-danger">Inactive</span></td>
+                  <% } %>
 
                   <td><%= new Date(item.createdAt).toDateString() %></td>
 
                   <td class="text-end">
-                 
+
                     <button class="btn btn-info text-white"><a href="/admin/order-list/<%=item._id%>">Orders</a></button>
-                   
+
                     <% if (item.status == true) { %>
                     <button class="btn btn-danger text-white" onclick="changeUserStatus('<%= item._id %>',false)">Block</button>
                     <% } else { %>
@@ -87,16 +87,42 @@
 
     </div>
 
+
     <script>
       function changeUserStatus(userId, status) {
-
         $.ajax({
           url: '/admin/change_user_status/?id=' + userId + '&status=' + status,
           method: 'PUT',
           success(response) {
-            location.reload()
-
+            if (response.user == 'true') {
+              swal({
+                title: 'Success!',
+                text: 'User is UnBlocked',
+                icon: 'success',
+                timer : 4000
+              }).then(()=>{
+                location.reload()
+              });
+            } else {
+              swal({
+                title: 'Success!',
+                text: 'User is Blocked .',
+                icon: 'success',
+                timer : 4000
+              }).then(()=>{
+                location.reload()
+              });
+            }
+            
+          },
+          error() {
+            swal({
+              title: 'Error!',
+              text: 'Failed to change user status.',
+              icon: 'error'
+            });
           }
-        })
+        });
       }
     </script>
+    
