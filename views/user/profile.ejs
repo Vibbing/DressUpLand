@@ -521,11 +521,11 @@
     }
 
     if (flag == 1) {
-      submit(userNameValue, emailValue, mobileValue)
+      addressSubmit(userNameValue, emailValue, mobileValue)
     }
   }
 
-  function submit(userName, email, mobile) {
+  function addressSubmit(userName, email, mobile) {
     $.ajax({
       url: '/change-user-data/' + '<%=user._id%>',
       method: 'POST',
