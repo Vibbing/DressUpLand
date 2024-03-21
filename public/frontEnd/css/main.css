@@ -4530,12 +4530,13 @@ table .product-thumbnail img {
 }
 
 .detail-gallery .slick-slider {
+  width: 500px;
   background-color: #000;
   margin-bottom: 30px;
-  border-radius: 10px;
 }
 
 .detail-gallery .slick-slider img {
+  width: 100%;
   opacity: 0.96;
 }
 

@@ -621,7 +621,7 @@
             zoomType: "inner",
             cursor: "crosshair",
             zoomWindowFadeIn: 500,
-            zoomWindowFadeOut: 750
+            zoomWindowFadeOut: 750,
         });
     })
 
